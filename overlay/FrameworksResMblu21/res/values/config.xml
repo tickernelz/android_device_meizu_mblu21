@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">false</bool>
+    <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
+    <bool name="config_hotswapCapable">true</bool>
+    <bool name="config_intrusiveNotificationLed">true</bool>
+    <bool name="config_supportsCamToggle">true</bool>
+    <bool name="config_supportsMicToggle">true</bool>
+    <bool name="config_unplugTurnsOnScreen">true</bool>
+    <integer name="config_brightness_ramp_rate_slow">100</integer>
+    <string name="config_displayLightSensorType" translatable="false">android.sensor.light</string>
+</resources>
