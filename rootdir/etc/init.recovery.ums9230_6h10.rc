@@ -6,7 +6,6 @@
 on init
     write /sys/fs/selinux/checkreqprot 0
     setprop sys.usb.configfs 1
-    setprop sys.usb.controller musb-hdrc.0.auto
 
 on boot
     write /sys/block/mmcblk0boot0/force_ro 0
