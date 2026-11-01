@@ -8,6 +8,14 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/vabc_features.m
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 
 PRODUCT_SHIPPING_API_LEVEL := 34
+
+PRODUCT_SOURCE_ROOT_DIRS += \
+    -device/google/atv \
+    -device/google/sdv \
+    -device/google/trout \
+    -hardware/qcom \
+    -hardware/qcom-caf \
+    -vendor/qcom
 PRODUCT_EXTRA_VNDK_VERSIONS := 33
 PRODUCT_BUILD_VENDOR_BOOT_IMAGE := false
 PRODUCT_BUILD_INIT_BOOT_IMAGE := true
