@@ -17,8 +17,24 @@ PRODUCT_SOURCE_ROOT_DIRS += \
     -hardware/qcom-caf \
     -vendor/qcom
 PRODUCT_EXTRA_VNDK_VERSIONS := 33
-PRODUCT_BUILD_VENDOR_BOOT_IMAGE := false
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
 PRODUCT_BUILD_INIT_BOOT_IMAGE := true
+
+PRODUCT_PACKAGES += \
+    e2fsck.vendor_ramdisk \
+    fsck.f2fs.vendor_ramdisk \
+    linker.vendor_ramdisk \
+    resize.f2fs.vendor_ramdisk \
+    snapuserd.vendor_ramdisk
+
+PRODUCT_PACKAGES += \
+    android.hardware.boot-service.default_recovery \
+    android.hardware.fastboot-service.example_recovery \
+    android.hardware.health-service.example_recovery \
+    fastbootd
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/etc/init.recovery.ums9230_6h10.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.ums9230_6h10.rc
 
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_system=true \

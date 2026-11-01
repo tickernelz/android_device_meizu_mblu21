@@ -20,13 +20,15 @@ The first bring-up keeps everything the vendor owns exactly as shipped and build
 | Image | Source |
 |---|---|
 | `boot` | stock GKI kernel, re-signed |
-| `vendor_boot` | stock (vendor ramdisk, first-stage modules, DTB, stock recovery), re-signed |
+| `vendor_boot` | built: stock DTB, cmdline and bootconfig, stock first-stage modules, fstabs and ueventd rules in the platform ramdisk, plus Lineage Recovery with fastbootd as a separate recovery ramdisk |
 | `dtbo` | stock, re-signed |
 | `vendor`, `odm`, `vendor_dlkm`, `system_dlkm` | stock images, unchanged |
 | `init_boot`, `system`, `system_ext`, `product` | built from LineageOS source |
 | `vbmeta*` | built; same chain layout and rollback index locations as stock, including the stock Unisoc key for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 
 All rebuilt and re-signed images use the public AOSP test key (`external/avb/test/data/testkey_rsa4096.pem`), so the device must have an unlocked bootloader to boot them.
+
+The device has no `recovery` partition: recovery and fastbootd live in `vendor_boot`.
 
 The stock images live in [android_vendor_meizu_mblu21](https://github.com/tickernelz/android_vendor_meizu_mblu21).
 
@@ -40,7 +42,7 @@ To regenerate the prebuilt images from your own stock dump (partition dump plus 
 ./extract-prebuilts.sh <partition_dump_dir> <lpunpack_super_dir>
 ```
 
-The script checks every image against `vendor/meizu/mblu21/images.sha256`.
+The script checks every image against `vendor/meizu/mblu21/images.sha256`, and the vendor ramdisk files and DTB taken from the stock `vendor_boot` against `vendor_ramdisk.sha256` and `dtb.sha256`.
 
 ## License
 
