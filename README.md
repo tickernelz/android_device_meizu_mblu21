@@ -26,6 +26,8 @@ The first bring-up keeps everything the vendor owns exactly as shipped and build
 | `init_boot`, `system`, `system_ext`, `product` | built from LineageOS source |
 | `vbmeta*` | built; same chain layout and rollback index locations as stock, including the stock Unisoc key for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 
+All rebuilt and re-signed images use the public AOSP test key (`external/avb/test/data/testkey_rsa4096.pem`), so the device must have an unlocked bootloader to boot them.
+
 The stock images live in [android_vendor_meizu_mblu21](https://github.com/tickernelz/android_vendor_meizu_mblu21).
 
 ## Build

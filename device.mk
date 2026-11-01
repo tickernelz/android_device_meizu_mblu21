@@ -43,4 +43,4 @@ PRODUCT_AAPT_PREF_CONFIG := xhdpi
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
-$(call inherit-product-if-exists, vendor/meizu/mblu21/mblu21-vendor.mk)
+$(call inherit-product, vendor/meizu/mblu21/mblu21-vendor.mk)
