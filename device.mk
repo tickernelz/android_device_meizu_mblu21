@@ -24,7 +24,6 @@ PRODUCT_PACKAGES += \
     e2fsck.vendor_ramdisk \
     fsck.f2fs.vendor_ramdisk \
     linker.vendor_ramdisk \
-    resize.f2fs.vendor_ramdisk \
     snapuserd.vendor_ramdisk
 
 PRODUCT_PACKAGES += \
