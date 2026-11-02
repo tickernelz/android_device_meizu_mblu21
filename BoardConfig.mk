@@ -52,8 +52,8 @@ TARGET_NO_KERNEL_OVERRIDE := true
 BOARD_PREBUILT_BOOTIMAGE := $(VENDOR_PATH)/images/boot.img
 BOARD_PREBUILT_DTBOIMAGE := $(VENDOR_PATH)/images/dtbo.img
 
-BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 bootconfig
-BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10
+BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 ignore_loglevel bootconfig
+BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10 androidboot.selinux=permissive androidboot.init_fatal_reboot_target=recovery
 BOARD_PREBUILT_DTBIMAGE_DIR := $(VENDOR_PATH)/dtb
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_KERNEL_BASE := 0x00000000
