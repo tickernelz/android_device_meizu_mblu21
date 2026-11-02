@@ -6,11 +6,15 @@
 <resources>
     <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">false</bool>
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
+    <bool name="config_fillMainBuiltInDisplayCutout">true</bool>
     <bool name="config_hotswapCapable">true</bool>
     <bool name="config_intrusiveNotificationLed">true</bool>
     <bool name="config_supportsCamToggle">true</bool>
     <bool name="config_supportsMicToggle">true</bool>
     <bool name="config_unplugTurnsOnScreen">true</bool>
     <integer name="config_brightness_ramp_rate_slow">100</integer>
+    <integer name="config_defaultPeakRefreshRate">90</integer>
     <string name="config_displayLightSensorType" translatable="false">android.sensor.light</string>
+    <string name="config_mainBuiltInDisplayCutout" translatable="false">m0,46.00001m-28.00001,0a5.46876,5.4708 0 1 0 56.00001,0a5.46876,5.4708 0 1 0 -56.00001,0z</string>
+    <string name="config_mainBuiltInDisplayCutoutRectApproximation" translatable="false">M 0.0,0.0 h 80 v 80 h -80 Z</string>
 </resources>

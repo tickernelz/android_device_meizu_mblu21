@@ -1,0 +1,6 @@
+on boot
+    write /dev/cpuctl/top-app/cpu.uclamp.min 30
+    write /dev/cpuctl/top-app/cpu.uclamp.latency_sensitive 1
+    write /dev/cpuctl/foreground/cpu.uclamp.min 30
+    write /dev/cpuctl/foreground/cpu.uclamp.latency_sensitive 1
+    setprop vendor.camera.aux.packagelist org.lineageos.aperture.noaux
