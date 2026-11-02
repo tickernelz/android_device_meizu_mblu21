@@ -52,8 +52,12 @@ TARGET_NO_KERNEL_OVERRIDE := true
 BOARD_PREBUILT_BOOTIMAGE := $(VENDOR_PATH)/images/boot.img
 BOARD_PREBUILT_DTBOIMAGE := $(VENDOR_PATH)/images/dtbo.img
 
+BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 bootconfig
+BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10 androidboot.selinux=permissive
+ifeq ($(MBLU21_BRINGUP),1)
 BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 ignore_loglevel bootconfig
-BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10 androidboot.selinux=permissive androidboot.init_fatal_reboot_target=recovery
+BOARD_BOOTCONFIG += androidboot.init_fatal_reboot_target=recovery
+endif
 BOARD_PREBUILT_DTBIMAGE_DIR := $(VENDOR_PATH)/dtb
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_KERNEL_BASE := 0x00000000
@@ -66,6 +70,8 @@ BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
 BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/recovery.fstab
+TARGET_RECOVERY_UI_BRIGHTNESS_FILE := /sys/class/backlight/sprd_backlight/brightness
+TARGET_RECOVERY_UI_MAX_BRIGHTNESS_FILE := /sys/class/backlight/sprd_backlight/max_brightness
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 

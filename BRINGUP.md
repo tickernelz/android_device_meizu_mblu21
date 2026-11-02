@@ -39,21 +39,35 @@ init: InitFatalReboot: signal 6
 
 The fatal path reboots to the bootloader, which looks like a boot loop. Every
 `avb=` flag is removed from the first-stage fstab and from
-`rootdir/etc/recovery.fstab`; `vendor`/`odm`/`vendor_dlkm`/`system_dlkm`
-stay byte-identical to stock, so nothing else changed for them.
+`rootdir/etc/recovery.fstab`. That drops dm-verity for every logical
+partition, `vendor`/`odm`/`vendor_dlkm`/`system_dlkm` included; their images
+stay byte-identical to stock, so only verification, not content, changed.
 
 The Meizu vbmeta cannot be replaced: a test-key vbmeta, with or without a valid
 signature, stops at the logo. That is why verification is disabled instead of
 re-keyed.
 
-## Bring-up flags that must be removed before a release
+## Bring-up opt-in
 
-- `ignore_loglevel` in `BOARD_KERNEL_CMDLINE`: sends every kernel and init
-  message to the ttyS1 console, which is what fills `/sys/fs/pstore`.
-- `androidboot.selinux=permissive` in `BOARD_BOOTCONFIG`: SELinux is
-  permissive; the device tree has no sepolicy yet.
-- `androidboot.init_fatal_reboot_target=recovery`: a fatal init error lands in
-  recovery instead of the bootloader, so the log can be read.
+A distribution build uses the stock cmdline. Two make variables switch the
+debug behaviour on:
+
+- `MBLU21_BRINGUP=1` adds `ignore_loglevel` to `BOARD_KERNEL_CMDLINE` and
+  `androidboot.init_fatal_reboot_target=recovery` to `BOARD_BOOTCONFIG`, so
+  every kernel and init message reaches the ttyS1 console and a fatal init
+  error lands in recovery instead of the bootloader.
+- `MBLU21_ADB_KEYS=device/meizu/mblu21/keys/adb_keys` copies that public key
+  into the recovery ramdisk. Soong only accepts a path inside the source tree;
+  `keys/adb_keys` is gitignored. Nothing is copied when the variable is empty,
+  which is the default.
+
+`androidboot.selinux=permissive` is still unconditional: SELinux stays
+permissive until the device sepolicy exists.
+
+Measured cost of `ignore_loglevel` here: the console takes 29 KB/s during the
+20-30 s boot bucket (634 KB between 8 s and 50 s) against 249-282 B/s idle,
+because the UART FIFO drains one character per spinlock iteration. Shipping
+builds must not carry it.
 
 ## Flashing the boot chain
 
@@ -67,8 +81,19 @@ re-keyed.
 
 ## Recovery adb
 
-The recovery ramdisk carries the host public key at
+`MBLU21_ADB_KEYS=<file>` puts that public key at
 `/product/etc/security/adb_keys`, the target of the `/adb_keys` symlink, so
-`adb` in recovery is authorized without the on-screen prompt. The key file is
-`keys/adb_keys`, which is gitignored; drop your own file there to get the same
-behaviour.
+`adb` in recovery is authorized without the on-screen prompt. The variable is
+empty by default, so a distribution build carries no key. `keys/.gitignore`
+covers `adb_keys` and `*_adb_keys` inside `keys/`; `git check-ignore -v
+keys/adb_keys` exits 0.
+
+Before uploading a release, confirm the images carry no key:
+
+```
+python3 system/tools/mkbootimg/unpack_bootimg.py --boot_img vendor_boot.img --out d
+for f in d/vendor_ramdisk*; do lz4 -dc "$f" | cpio -t; done | grep -c '^product/etc/security/adb_keys$'
+```
+
+The count must be 0. The `adb_keys -> /product/etc/security/adb_keys`
+symlink at the ramdisk root is always present and holds no key.

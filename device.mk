@@ -35,9 +35,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/init.recovery.ums9230_6h10.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.ums9230_6h10.rc
 
-ADB_KEYS_FILE := $(wildcard $(LOCAL_PATH)/keys/adb_keys)
-ifneq ($(ADB_KEYS_FILE),)
-PRODUCT_COPY_FILES += $(ADB_KEYS_FILE):$(TARGET_COPY_OUT_RECOVERY)/root/product/etc/security/adb_keys
+ifneq ($(MBLU21_ADB_KEYS),)
+PRODUCT_COPY_FILES += $(MBLU21_ADB_KEYS):$(TARGET_COPY_OUT_RECOVERY)/root/product/etc/security/adb_keys
 endif
 
 AB_OTA_POSTINSTALL_CONFIG += \
