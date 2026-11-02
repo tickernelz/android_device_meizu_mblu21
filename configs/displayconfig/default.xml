@@ -1,0 +1,34 @@
+<displayConfiguration>
+    <densityMapping>
+         <density>
+            <height>1080</height>
+            <width>2400</width>
+            <density>480</density>
+         </density>
+         <density>
+            <height>1080</height>
+            <width>2408</width>
+            <density>480</density>
+         </density>
+         <density>
+            <height>720</height>
+            <width>1640</width>
+            <density>280</density>
+         </density>
+         <density>
+            <height>720</height>
+            <width>1600</width>
+            <density>280</density>
+         </density>
+         <density>
+            <height>720</height>
+            <width>1612</width>
+            <density>280</density>
+         </density>
+         <density>
+            <height>800</height>
+            <width>1280</width>
+            <density>200</density>
+         </density>
+    </densityMapping>
+</displayConfiguration>

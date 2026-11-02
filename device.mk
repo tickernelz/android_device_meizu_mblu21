@@ -34,11 +34,11 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/init.recovery.ums9230_6h10.rc:$(TARGET_COPY_OUT_RECOVERY)/root/init.recovery.ums9230_6h10.rc \
+    $(LOCAL_PATH)/configs/displayconfig/default.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/displayconfig/default.xml \
     $(LOCAL_PATH)/rootdir/etc/init.mblu21.perf.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.mblu21.perf.rc
 
 PRODUCT_PRODUCT_PROPERTIES += \
-    debug.hwc.gsp.disable=1 \
-    ro.sf.lcd_density=280
+    debug.hwc.gsp.disable=1
 
 ifneq ($(MBLU21_ADB_KEYS),)
 PRODUCT_COPY_FILES += $(MBLU21_ADB_KEYS):$(TARGET_COPY_OUT_RECOVERY)/root/product/etc/security/adb_keys
