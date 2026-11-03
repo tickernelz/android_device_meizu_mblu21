@@ -84,14 +84,11 @@ def drop_telephony_metrics(smali_dir):
             text,
         )
         text = re.sub(r"\n    invoke-virtual(/range)? \{[^}]*\}, " + re.escape(METRICS) + r"->writeOn\w+\([^)]*\)V\n", "\n", text)
+        if re.search(r"invoke-[\w/]+ \{[^}]*\}, " + re.escape(METRICS) + "->", text):
+            sys.exit(f"{name}: TelephonyMetrics call left")
         text = text.replace(METRICS, "Ljava/lang/Object;")
         with open(path, "w") as f:
             f.write(text)
-    for root, _, files in os.walk(smali_dir):
-        for name in files:
-            with open(os.path.join(root, name)) as f:
-                if METRICS in f.read():
-                    sys.exit(f"{name}: TelephonyMetrics reference left")
 
 
 def drop_calls(smali_dir, calls):
