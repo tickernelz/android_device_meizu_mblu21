@@ -117,7 +117,11 @@ TARGET_KERNEL_EXT_MODULES := \
     kernel5.15/audio/sprd/codec/sprd/sc2730/power_dev \
     kernel5.15/audio/sprd/codec/sprd/pdm_r2p0 \
     kernel5.15/audio/sprd/codec/sprd/ucp1301 \
-    ../../../$(DEVICE_PATH)/modules/prebuilt
+    kernel5.15/input/fingerprint/silead \
+    common/camera/flash/gpio \
+    kernel5.15/power/psc2965 \
+    kernel5.15/touchscreen/ilitek_v3 \
+    kernel5.15/touchscreen/focaltech_ft8725_spi
 
 BOARD_PREBUILT_BOOTIMAGE := $(VENDOR_PATH)/proprietary/images/boot.img
 BOARD_KERNEL_SEPARATED_DTBO := true
