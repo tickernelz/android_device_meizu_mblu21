@@ -49,12 +49,12 @@ BOARD_INIT_BOOT_HEADER_VERSION := 4
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_RAMDISK_USE_LZ4 := true
 TARGET_NO_KERNEL_OVERRIDE := true
-BOARD_PREBUILT_BOOTIMAGE := $(VENDOR_PATH)/images/boot.img
-BOARD_PREBUILT_DTBOIMAGE := $(VENDOR_PATH)/images/dtbo.img
+BOARD_PREBUILT_BOOTIMAGE := $(VENDOR_PATH)/proprietary/images/boot.img
+BOARD_PREBUILT_DTBOIMAGE := $(VENDOR_PATH)/proprietary/images/dtbo.img
 
 BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 bootconfig
 BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10 androidboot.selinux=permissive
-BOARD_PREBUILT_DTBIMAGE_DIR := $(VENDOR_PATH)/dtb
+BOARD_PREBUILT_DTBIMAGE_DIR := $(VENDOR_PATH)/proprietary/dtb
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
@@ -71,9 +71,9 @@ TARGET_RECOVERY_UI_MAX_BRIGHTNESS_FILE := /sys/class/backlight/sprd_backlight/ma
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 
-BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(wildcard $(VENDOR_PATH)/vendor_ramdisk/lib/modules/*.ko)
-BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(strip $(shell cat $(VENDOR_PATH)/vendor_ramdisk/lib/modules/modules.load))
-BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(strip $(shell cat $(VENDOR_PATH)/vendor_ramdisk/lib/modules/modules.load.recovery))
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(wildcard $(VENDOR_PATH)/proprietary/vendor_ramdisk/lib/modules/*.ko)
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(strip $(shell cat $(VENDOR_PATH)/proprietary/vendor_ramdisk/lib/modules/modules.load))
+BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(strip $(shell cat $(VENDOR_PATH)/proprietary/vendor_ramdisk/lib/modules/modules.load.recovery))
 BOARD_DO_NOT_STRIP_VENDOR_RAMDISK_MODULES := true
 
 BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864
@@ -93,10 +93,10 @@ BOARD_GROUP_UNISOC_PARTITION_LIST := \
     vendor \
     vendor_dlkm
 
-BOARD_PREBUILT_VENDORIMAGE := $(VENDOR_PATH)/images/vendor.img
-BOARD_PREBUILT_ODMIMAGE := $(VENDOR_PATH)/images/odm.img
-BOARD_PREBUILT_VENDOR_DLKMIMAGE := $(VENDOR_PATH)/images/vendor_dlkm.img
-BOARD_PREBUILT_SYSTEM_DLKMIMAGE := $(VENDOR_PATH)/images/system_dlkm.img
+BOARD_PREBUILT_VENDORIMAGE := $(VENDOR_PATH)/proprietary/images/vendor.img
+BOARD_PREBUILT_ODMIMAGE := $(VENDOR_PATH)/proprietary/images/odm.img
+BOARD_PREBUILT_VENDOR_DLKMIMAGE := $(VENDOR_PATH)/proprietary/images/vendor_dlkm.img
+BOARD_PREBUILT_SYSTEM_DLKMIMAGE := $(VENDOR_PATH)/proprietary/images/system_dlkm.img
 
 BOARD_USES_VENDORIMAGE := true
 BOARD_USES_ODMIMAGE := true
@@ -127,11 +127,11 @@ BOARD_AVB_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
 
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += \
-    --chain_partition l_modem:11:$(VENDOR_PATH)/avb/unisoc_modem.avbpubkey \
-    --chain_partition l_ldsp:12:$(VENDOR_PATH)/avb/unisoc_modem.avbpubkey \
-    --chain_partition l_gdsp:13:$(VENDOR_PATH)/avb/unisoc_modem.avbpubkey \
-    --chain_partition pm_sys:14:$(VENDOR_PATH)/avb/unisoc_modem.avbpubkey \
-    --chain_partition l_agdsp:15:$(VENDOR_PATH)/avb/unisoc_modem.avbpubkey
+    --chain_partition l_modem:11:$(VENDOR_PATH)/proprietary/avb/unisoc_modem.avbpubkey \
+    --chain_partition l_ldsp:12:$(VENDOR_PATH)/proprietary/avb/unisoc_modem.avbpubkey \
+    --chain_partition l_gdsp:13:$(VENDOR_PATH)/proprietary/avb/unisoc_modem.avbpubkey \
+    --chain_partition pm_sys:14:$(VENDOR_PATH)/proprietary/avb/unisoc_modem.avbpubkey \
+    --chain_partition l_agdsp:15:$(VENDOR_PATH)/proprietary/avb/unisoc_modem.avbpubkey
 
 BOARD_AVB_BOOT_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
 BOARD_AVB_BOOT_ALGORITHM := SHA256_RSA4096

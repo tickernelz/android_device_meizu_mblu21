@@ -64,4 +64,7 @@ PRODUCT_AAPT_PREF_CONFIG := xhdpi
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
+PRODUCT_COPY_FILES += \
+    vendor/meizu/mblu21/proprietary/images/kernel:kernel
+
 $(call inherit-product, vendor/meizu/mblu21/mblu21-vendor.mk)
