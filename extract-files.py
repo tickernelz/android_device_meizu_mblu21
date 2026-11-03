@@ -201,38 +201,52 @@ def write_text(file_path: str, text: str):
 
 def drop_telephony_metrics(smali_dir: str):
     metrics = re.escape(TELEPHONY_METRICS)
-    for name in ('ImsRadioInterface.smali', 'ImsRadioInterface$RilHandler.smali'):
+    for name in (
+        'ImsRadioInterface.smali',
+        'ImsRadioInterface$RilHandler.smali',
+    ):
         file_path = path.join(smali_dir, 'com/spreadtrum/ims', name)
         text = re.sub(
-            r'invoke-static \{\}, ' + metrics + r'->getInstance\(\)' + metrics
+            r'invoke-static \{\}, '
+            + metrics
+            + r'->getInstance\(\)'
+            + metrics
             + r'\n\n    move-result-object (v\d+)',
             r'const/4 \1, 0x0',
             read_text(file_path),
         )
         text = re.sub(
-            r'\n    invoke-virtual(/range)? \{[^}]*\}, ' + metrics + r'->writeOn\w+\([^)]*\)V\n',
+            r'\n    invoke-virtual(/range)? \{[^}]*\}, '
+            + metrics
+            + r'->writeOn\w+\([^)]*\)V\n',
             '\n',
             text,
         )
         assert not re.search(
             r'invoke-[\w/]+ \{[^}]*\}, ' + metrics + '->', text
         ), f'{name}: TelephonyMetrics call left'
-        write_text(file_path, text.replace(TELEPHONY_METRICS, 'Ljava/lang/Object;'))
+        write_text(
+            file_path, text.replace(TELEPHONY_METRICS, 'Ljava/lang/Object;')
+        )
     for root, _, files in os.walk(smali_dir):
         for name in files:
-            assert TELEPHONY_METRICS not in read_text(
-                path.join(root, name)
-            ), f'{name}: TelephonyMetrics reference left'
+            assert TELEPHONY_METRICS not in read_text(path.join(root, name)), (
+                f'{name}: TelephonyMetrics reference left'
+            )
 
 
 def drop_call(smali_dir: str, smali_path: str, method: str):
     file_path = path.join(smali_dir, smali_path)
     text, count = re.subn(
-        r'\n    invoke-virtual(/range)? \{[^}]*\}, ' + re.escape(method) + r'\n',
+        r'\n    invoke-virtual(/range)? \{[^}]*\}, '
+        + re.escape(method)
+        + r'\n',
         '\n',
         read_text(file_path),
     )
-    assert count == 1, f'{smali_path}: expected one call to {method}, found {count}'
+    assert count == 1, (
+        f'{smali_path}: expected one call to {method}, found {count}'
+    )
     write_text(file_path, text)
 
 
@@ -247,7 +261,11 @@ def strip_hiddenapi_flags(smali_dir: str):
                     member = next(
                         j for j, t in enumerate(tokens) if '(' in t or ':' in t
                     )
-                    kept = [t for t in tokens[1:member] if not HIDDENAPI_FLAG.match(t)]
+                    kept = [
+                        t
+                        for t in tokens[1:member]
+                        if not HIDDENAPI_FLAG.match(t)
+                    ]
                     lines[i] = ' '.join([tokens[0], *kept, *tokens[member:]])
             write_text(file_path, '\n'.join(lines))
 
@@ -281,14 +299,21 @@ def merge_boot_jars(
         else:
             os.makedirs(path.join(dst, path.dirname(only)))
             for name in os.listdir(path.join(src, path.dirname(only))):
-                if re.fullmatch(re.escape(path.basename(only)) + r'(\$\w+)?\.smali', name):
-                    shutil.copy(path.join(src, path.dirname(only), name), path.join(dst, path.dirname(only)))
+                if re.fullmatch(
+                    re.escape(path.basename(only)) + r'(\$\w+)?\.smali', name
+                ):
+                    shutil.copy(
+                        path.join(src, path.dirname(only), name),
+                        path.join(dst, path.dirname(only)),
+                    )
         strip_hiddenapi_flags(dst)
     apktool('b', app_dir, '-o', file_path)
 
 
 IMS_APK = 'system_ext/priv-app/ims/ims.apk'
-RADIO_INTERACTOR_APK = 'system_ext/priv-app/radio_interactor_service/radio_interactor_service.apk'
+RADIO_INTERACTOR_APK = (
+    'system_ext/priv-app/radio_interactor_service/radio_interactor_service.apk'
+)
 RADIO_INTERACTOR_COMMON = 'system/framework/radio_interactor_common.jar'
 
 
@@ -357,6 +382,7 @@ module = ExtractUtilsModule(
     add_firmware_proprietary_file=True,
 )
 
+
 def unpinned_vendor_files():
     found = []
     for proprietary_file in module.proprietary_files:
@@ -388,4 +414,7 @@ if __name__ == '__main__':
     if not args.regenerate_makefiles:
         unpinned = unpinned_vendor_files()
         if unpinned:
-            sys.exit('Extracted files do not match their pins:\n' + '\n'.join(unpinned))
+            sys.exit(
+                'Extracted files do not match their pins:\n'
+                + '\n'.join(unpinned)
+            )

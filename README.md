@@ -29,7 +29,9 @@ Tested on one M416H. Every row names the build it was tested with; a component w
 
 `79d312d` and `0d92969` are not on `lineage-24.0` yet, so a build of this branch still boots with SELinux permissive and Volume Down can reset the phone.
 
-Not tested yet: Bluetooth pairing, battery deep sleep, speaker/earpiece/headset one by one, camera flash, fingerprint (the sensor on the test phone is broken in hardware).
+Battery deep sleep (≤ 1%/hour over 8 hours with the screen off) was not measured: the overnight run was skipped by Zhafron's decision on 2026-11-03, so there is no drain data.
+
+Not tested yet: Bluetooth pairing, speaker/earpiece/headset one by one, camera flash, fingerprint (the sensor on the test phone is broken in hardware).
 
 ## Layout
 
