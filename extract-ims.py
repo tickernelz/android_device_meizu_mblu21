@@ -25,10 +25,18 @@ JARS = {
 }
 COPIES = [
     "system_ext/bin/ims_bridged",
+    "system_ext/bin/srmi_proxyd",
     "system_ext/etc/init/ims_bridged.rc",
+    "system_ext/etc/init/srmi_proxyd.rc",
     "system_ext/etc/permissions/com.spreadtrum.ims.xml",
     "system_ext/lib/libimsbrd.so",
+    "system_ext/lib/libsrmi.so",
+    "system_ext/lib/libsrmiservice.so",
+    "system_ext/lib/vendor.unisoc.frameworks.srmi-V1-ndk.so",
     "system_ext/lib64/libimsbrd.so",
+    "system_ext/lib64/libsrmi.so",
+    "system_ext/lib64/libsrmiservice.so",
+    "system_ext/lib64/vendor.unisoc.frameworks.srmi-V1-ndk.so",
 ]
 
 METRICS = "Lcom/android/internal/telephony/metrics/TelephonyMetrics;"

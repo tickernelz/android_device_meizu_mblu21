@@ -1,1 +1,2 @@
 /system_ext/bin/ims_bridged    u:object_r:ims_bridged_exec:s0
+/system_ext/bin/srmi_proxyd    u:object_r:srmi_proxyd_exec:s0

@@ -1,0 +1,10 @@
+<!--
+     SPDX-FileCopyrightText: 2026 The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<manifest version="1.0" type="framework">
+    <hal format="aidl">
+        <name>vendor.unisoc.frameworks.srmi</name>
+        <fqname>ISrmiManager/default</fqname>
+    </hal>
+</manifest>

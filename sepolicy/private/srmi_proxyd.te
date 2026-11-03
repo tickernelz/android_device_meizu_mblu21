@@ -1,0 +1,4 @@
+init_daemon_domain(srmi_proxyd)
+
+allow srmi_proxyd fwk_srmi_service:service_manager { add find };
+allow srmi_proxyd { radio servicemanager }:binder { call transfer };

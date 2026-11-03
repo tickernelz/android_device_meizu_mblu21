@@ -1,0 +1,5 @@
+type fwk_srmi_service, service_manager_type;
+type ims_bridged, domain, coredomain;
+type ims_bridged_exec, system_file_type, exec_type, file_type;
+type srmi_proxyd, domain, coredomain;
+type srmi_proxyd_exec, system_file_type, exec_type, file_type;
