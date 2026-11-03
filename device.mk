@@ -52,7 +52,9 @@ AB_OTA_POSTINSTALL_CONFIG += \
     POSTINSTALL_OPTIONAL_system=true
 
 PRODUCT_PACKAGES += \
-    FrameworksResMblu21
+    CarrierConfigMblu21 \
+    FrameworksResMblu21 \
+    TeleServiceMblu21
 
 PRODUCT_PACKAGES += \
     checkpoint_gc \
