@@ -11,7 +11,21 @@ LineageOS 24.0 (Android 17) device tree for the Meizu mBlu 21, model M416H.
 
 ## Status
 
-**Untested on hardware.** Nothing in this tree has been booted on a phone yet. Builds are published as pre-releases labelled `UNTESTED`.
+Tested on one M416H. Every row names the build it was tested with; a component without a row has not been tested.
+
+| Component | Result | Build, date |
+|---|---|---|
+| Boot, display, touch, FBE unlock with a PIN, USB adb, charging | works | release [`lineage-24.0-20261103-UNOFFICIAL-mblu21`](https://github.com/tickernelz/lineage_build_mblu21/releases/tag/lineage-24.0-20261103-UNOFFICIAL-mblu21), this branch at `7dd4b55`, 2026-11-03 |
+| Wi-Fi (5 GHz), Telkomsel LTE data | works | same release, 2026-11-03 |
+| Rear and front camera: photo, video with audio | works | same release, 2026-11-03 |
+| Microphone recording | works | same release, 2026-11-03 |
+| SELinux enforcing: boot, Wi-Fi, LTE, Bluetooth on, camera, no crashes | works | local build with `79d312d` (branch `zha4374-selinux-voldown`), 2026-11-03 |
+| Voice calls (two-way audio) and SMS send/receive, Telkomsel | works | local build with `79d312d`, 2026-11-03 |
+| Volume Down in Android and Lineage Recovery without resetting the phone | works | local build with `0d92969` (branch `zha4374-selinux-voldown`), 2026-11-03 |
+
+`79d312d` and `0d92969` are not on `lineage-24.0` yet, so a build of this branch still boots with SELinux permissive and Volume Down can reset the phone.
+
+Not tested yet: Bluetooth pairing, VoLTE, outdoor GPS fix, battery deep sleep, OTA, MTP, speaker/earpiece/headset one by one, camera flash, fingerprint (the sensor on the test phone is broken in hardware).
 
 ## Layout
 
