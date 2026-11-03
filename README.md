@@ -85,7 +85,7 @@ From a stock dump:
 ./extract-files.py <dump_dir>
 ```
 
-`<dump_dir>` holds partition images named `<partition>_a.bin` or `<partition>_a.img` (an `spd_dump r all_lite` dump, or the assets of the [`mblu21-stock-U01005-20261031`](https://github.com/tickernelz/android_stock_meizu_mblu21/releases/tag/mblu21-stock-U01005-20261031) release), or `<partition>.img`, with `super.bin`/`super.img` in place of the logical partition images. A file whose SHA-1 differs from its pin does not stop the extraction: `extract-files.py` prints `... but expected hash ...` for it, writes it anyway and exits 0, so check the output for that line. Once the vendor repository is checked out, only `boot_a.bin` and `vendor_a.img` are needed: the other pinned files are kept from the checkout.
+`<dump_dir>` holds partition images named `<partition>_a.bin` or `<partition>_a.img` (an `spd_dump r all_lite` dump, or the assets of the [`mblu21-stock-U01005-20261031`](https://github.com/tickernelz/android_stock_meizu_mblu21/releases/tag/mblu21-stock-U01005-20261031) release), or `<partition>.img`, with `super.bin`/`super.img` in place of the logical partition images. extract-utils writes a file whose SHA-1 differs from its pin and goes on, so `extract-files.py` checks every pinned file in the vendor tree afterwards (against its fixup hash when it has one) and exits 1 with the list of files that are missing or do not match. Once the vendor repository is checked out, only `boot_a.bin` and `vendor_a.img` are needed: the other pinned files are kept from the checkout.
 
 `./setup-makefiles.py` regenerates the vendor makefiles from the lists.
 

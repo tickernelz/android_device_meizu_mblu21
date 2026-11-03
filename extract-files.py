@@ -33,7 +33,7 @@ from extract_utils.main import (
     ExtractUtilsModule,
 )
 from extract_utils.tools import apktool_path, java_path
-from extract_utils.utils import run_cmd
+from extract_utils.utils import file_path_sha1, run_cmd
 
 BLOCK_DEVICE_PARTITIONS = {
     'by-name': [
@@ -357,6 +357,24 @@ module = ExtractUtilsModule(
     add_firmware_proprietary_file=True,
 )
 
+def unpinned_vendor_files():
+    found = []
+    for proprietary_file in module.proprietary_files:
+        vendor_path = module.proprietary_file_vendor_path(proprietary_file)
+        for file in proprietary_file.file_list.files:
+            expected = file.fixup_hash or file.hash
+            if expected is None:
+                continue
+            file_path = path.join(vendor_path, file.dst)
+            if not path.isfile(file_path):
+                found.append(f'{file.dst}: missing, pinned {expected}')
+                continue
+            actual = file_path_sha1(file_path)
+            if actual != expected:
+                found.append(f'{file.dst}: SHA-1 {actual}, pinned {expected}')
+    return found
+
+
 if __name__ == '__main__':
     with TemporaryDirectory() as adb_dump_dir:
         args = parse_args()
@@ -366,3 +384,8 @@ if __name__ == '__main__':
 
         utils = ExtractUtils.device(module)
         utils.run()
+
+    if not args.regenerate_makefiles:
+        unpinned = unpinned_vendor_files()
+        if unpinned:
+            sys.exit('Extracted files do not match their pins:\n' + '\n'.join(unpinned))
