@@ -29,14 +29,16 @@ Not tested yet: Bluetooth pairing, VoLTE, outdoor GPS fix, battery deep sleep, O
 
 ## Layout
 
-The first bring-up keeps everything the vendor owns exactly as shipped and builds only the generic side:
+The kernel image is the stock Google GKI build; every kernel module the vendor ships is built from source except five Revo ODM modules:
 
 | Image | Source |
 |---|---|
-| `boot` | stock GKI kernel, re-signed |
-| `vendor_boot` | built: stock DTB, cmdline and bootconfig, stock first-stage modules, fstabs and ueventd rules in the platform ramdisk, plus Lineage Recovery with fastbootd as a separate recovery ramdisk |
-| `dtbo` | stock, re-signed |
-| `vendor`, `odm`, `vendor_dlkm`, `system_dlkm` | stock images, unchanged |
+| `boot` | stock, carrying the `Image` of Google GKI build `12096863` (`android13-5.15-2024-07`) byte for byte, re-signed |
+| `vendor_boot` | built: DTB from `kernel/meizu/ums9230`, stock cmdline and bootconfig, first-stage modules built from source in the stock load order, stock fstabs and ueventd rules in the platform ramdisk, plus Lineage Recovery with fastbootd as a separate recovery ramdisk |
+| `dtbo` | built from `kernel/meizu/ums9230`; its nine overlays are byte for byte the stock ones |
+| `vendor`, `odm` | stock images, unchanged |
+| `vendor_dlkm` | built: modules from `kernel/meizu/ums9230` and `kernel/meizu/ums9230-modules` in the stock load order |
+| `system_dlkm` | built from the `zram` and `zsmalloc` modules of GKI build `12096863`, signed by Google |
 | `init_boot`, `system`, `system_ext`, `product` | built from LineageOS source |
 | `vbmeta*` | built; same chain layout and rollback index locations as stock, including the stock Unisoc key for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 
@@ -56,13 +58,14 @@ Every proprietary file is listed in `proprietary-files.txt` and `proprietary-fir
 
 | Path in `vendor/meizu/mblu21` | Content |
 |---|---|
-| `proprietary/images/` | stock `boot` and `dtbo` without their AVB footers, `kernel` unpacked from `boot`, stock `vendor`, `odm`, `vendor_dlkm`, `system_dlkm` |
-| `proprietary/vendor_ramdisk/` | first-stage kernel modules with their load lists, fstabs and ueventd rules from the platform ramdisk of `vendor_boot`; the `fstab.ums9230_6h10` fixup removes its `avb` flags |
-| `proprietary/dtb/` | DTB of `vendor_boot` |
+| `proprietary/images/` | stock `boot` without its AVB footer, stock `vendor`, `odm` |
+| `proprietary/vendor_ramdisk/` | fstabs and ueventd rules from the platform ramdisk of `vendor_boot`; the `fstab.ums9230_6h10` fixup removes its `avb` flags |
+| `proprietary/system_dlkm/` | `zram.ko` and `zsmalloc.ko`, identical to the `system_dlkm` staging archive of GKI build `12096863` on ci.android.com |
+| `proprietary/vendor_dlkm/` | the Revo ODM modules `flash_ic_gpio`, `focaltech_spi_v4_1`, `psc2965-charger`, `revofp_silead`, `spi_ilitek`, which have no published source; `modules/prebuilt` adds them to the kernel module build so they keep their stock place in `modules.load` |
 | `proprietary/avb/unisoc_modem.avbpubkey` | public key in the AVB footer of `l_modem`, the key `vbmeta` uses for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 | `radio/` | stock signed `l_modem`, `l_ldsp`, `l_gdsp`, `l_agdsp`, `pm_sys` |
 
-`proprietary/images/vendor.img` (765,497,344 bytes) is over the GitHub file size limit and `proprietary/images/kernel` duplicates `boot`, so both are gitignored in the vendor repository and come from `extract-files.py`.
+`proprietary/images/vendor.img` (765,497,344 bytes) is over the GitHub file size limit, so it is gitignored in the vendor repository and comes from `extract-files.py`.
 
 From a phone running LineageOS, with rooted debugging enabled:
 
@@ -70,7 +73,7 @@ From a phone running LineageOS, with rooted debugging enabled:
 ./extract-files.py
 ```
 
-The script pulls `boot`, `dtbo`, `vendor_boot` and the modem and DSP partitions from `/dev/block/by-name`, and `vendor`, `odm`, `vendor_dlkm`, `system_dlkm` from `/dev/block/mapper`, all of the active slot, then extracts them like a stock dump.
+The script pulls `boot`, `vendor_boot` and the modem and DSP partitions from `/dev/block/by-name`, and `vendor`, `odm`, `vendor_dlkm`, `system_dlkm` from `/dev/block/mapper`, all of the active slot, then extracts them like a stock dump.
 
 From a stock dump:
 

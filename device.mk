@@ -38,6 +38,11 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/init.mblu21.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.mblu21.rc \
     $(LOCAL_PATH)/rootdir/etc/init.mblu21.perf.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.mblu21.perf.rc
 
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/modules/init.insmod.cfg:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/init.insmod.cfg \
+    $(LOCAL_PATH)/modules/modules.load.cali:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/modules.load.cali \
+    $(LOCAL_PATH)/modules/modules.load.charger:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/modules.load.charger
+
 PRODUCT_PRODUCT_PROPERTIES += \
     debug.hwc.gsp.disable=1
 
@@ -63,8 +68,5 @@ PRODUCT_AAPT_PREF_CONFIG := xhdpi
 
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
-
-PRODUCT_COPY_FILES += \
-    vendor/meizu/mblu21/proprietary/images/kernel:kernel
 
 $(call inherit-product, vendor/meizu/mblu21/mblu21-vendor.mk)

@@ -33,7 +33,6 @@ from extract_utils.utils import run_cmd
 BLOCK_DEVICE_PARTITIONS = {
     'by-name': [
         'boot',
-        'dtbo',
         'l_agdsp',
         'l_gdsp',
         'l_ldsp',
@@ -49,9 +48,10 @@ BLOCK_DEVICE_PARTITIONS = {
     ],
 }
 
+IMAGE_PARTITIONS = ['odm', 'vendor']
+
 AVB_FOOTER_MAGIC = b'AVBf'
 AVB_FOOTER_SIZE = 64
-DTB_NAME = 'ums9230_6h10.dtb'
 VENDOR_RAMDISK_TYPE_PLATFORM = 1
 
 
@@ -117,7 +117,7 @@ def extract_logical_images(ctx: ExtractCtx, file_path: str, dump_dir: str):
 
     with open(file_path, 'rb') as f:
         super_image = LpImage(f)
-        for partition in BLOCK_DEVICE_PARTITIONS['mapper']:
+        for partition in IMAGE_PARTITIONS:
             image_path = path.join(images_dir, f'{partition}.img')
             if not path.exists(image_path):
                 super_image.extract_partition(partition, image_path)
@@ -139,12 +139,6 @@ def extract_boot_images(ctx: ExtractCtx, file_path: str, dump_dir: str):
         if footer is not None:
             os.truncate(image_path, footer[0])
 
-    kernel_path = path.join(images_dir, 'kernel')
-    if path.basename(file_path) == 'boot.img' and not path.exists(kernel_path):
-        with TemporaryDirectory() as tmp_dir:
-            unpack_bootimg(image_path, tmp_dir)
-            shutil.move(path.join(tmp_dir, 'kernel'), kernel_path)
-
     return None
 
 
@@ -156,19 +150,11 @@ def extract_vendor_boot(ctx: ExtractCtx, file_path: str, dump_dir: str):
     if path.isdir(ramdisk_dir):
         return None
 
-    dtb_dir = path.join(dump_dir, 'dtb')
-    os.makedirs(dtb_dir, exist_ok=True)
-
     with TemporaryDirectory() as tmp_dir:
         output = unpack_bootimg(file_path, tmp_dir)
         for fragment in parse_mkbootimg_fragments(output):
             if fragment.ramdisk_type == VENDOR_RAMDISK_TYPE_PLATFORM:
                 extract_ramdisk(fragment.path, Path(ramdisk_dir))
-
-        shutil.copyfile(
-            path.join(tmp_dir, 'dtb'),
-            path.join(dtb_dir, DTB_NAME),
-        )
 
     return None
 
@@ -211,8 +197,8 @@ def pull_partitions_over_adb(dump_dir: str):
 
 extract_fns: extract_fns_user_type = {
     r'^(.+_a\.(bin|img)|super\.bin)$': link_unslotted_image,
-    r'^(super|odm|system_dlkm|vendor|vendor_dlkm)\.img$': extract_logical_images,
-    r'^(boot|dtbo)\.img$': extract_boot_images,
+    r'^(super|odm|vendor)\.img$': extract_logical_images,
+    r'^boot\.img$': extract_boot_images,
     r'^vendor_boot\.img$': extract_vendor_boot,
     r'^l_modem\.img$': extract_modem_avb_key,
 }
