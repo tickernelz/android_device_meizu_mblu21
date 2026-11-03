@@ -1,0 +1,4 @@
+persist.audio.bigvolume.enabled         u:object_r:system_prop:s0 exact bool
+persist.audio.bigvolume.switch          u:object_r:system_prop:s0 exact bool
+persist.bluetooth.a2dp_offload.switch   u:object_r:system_prop:s0 exact bool
+persist.fingerprint.location            u:object_r:system_prop:s0 exact string

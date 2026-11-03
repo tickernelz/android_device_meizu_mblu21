@@ -1,1 +1,2 @@
 allow init sysfs_mblu21_7sreset:file w_file_perms;
+allow init sysfs_devices_block:file w_file_perms;

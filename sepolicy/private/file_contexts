@@ -1,2 +1,3 @@
 /system_ext/bin/ims_bridged    u:object_r:ims_bridged_exec:s0
 /system_ext/bin/srmi_proxyd    u:object_r:srmi_proxyd_exec:s0
+/dev/block/platform/soc/soc:ap-apb/20200000\.ufs/by-name/misc    u:object_r:misc_block_device:s0

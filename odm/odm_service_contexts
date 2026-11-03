@@ -1,0 +1,2 @@
+vendor.lineage.health.IChargingControl/default           u:object_r:mblu21_absent_hal_service:s0
+vendor.lineage.livedisplay.IAdaptiveBacklight/default    u:object_r:mblu21_absent_hal_service:s0
