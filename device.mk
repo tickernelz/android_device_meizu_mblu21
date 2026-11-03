@@ -38,12 +38,13 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/init.mblu21.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.mblu21.rc \
     $(LOCAL_PATH)/rootdir/etc/init.mblu21.perf.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.mblu21.perf.rc
 
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/modules/init.insmod.cfg:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/init.insmod.cfg \
+    $(LOCAL_PATH)/modules/modules.load.cali:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/modules.load.cali \
+    $(LOCAL_PATH)/modules/modules.load.charger:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/modules.load.charger
+
 PRODUCT_PRODUCT_PROPERTIES += \
     debug.hwc.gsp.disable=1
-
-ifneq ($(MBLU21_ADB_KEYS),)
-PRODUCT_COPY_FILES += $(MBLU21_ADB_KEYS):$(TARGET_COPY_OUT_RECOVERY)/root/product/etc/security/adb_keys
-endif
 
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_system=true \
@@ -71,7 +72,3 @@ PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
 $(call inherit-product, vendor/meizu/mblu21/mblu21-vendor.mk)
-
-ifeq ($(WITH_GMS),true)
-$(call inherit-product, vendor/gapps/arm64/arm64-vendor.mk)
-endif

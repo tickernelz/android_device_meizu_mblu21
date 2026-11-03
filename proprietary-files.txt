@@ -1,0 +1,39 @@
+# All blobs are extracted from mblu21 U01005
+# meizu/meizu_mblu/MEIZU_mblu:14/U01005/1745906188:user/release-keys
+
+# AVB public key of the chained modem and DSP partitions - from mblu21 U01005 l_modem
+avb/unisoc_modem.avbpubkey;EXTRACT_ONLY|0ce334fc2428aaa22578bae3ecf0322cf1aa28ba
+
+# Images, AVB footer of boot removed - from mblu21 U01005
+images/boot.img;EXTRACT_ONLY|cdbfdfe62ba26e5f82db29c362de9ce331bacea5
+images/odm.img;EXTRACT_ONLY|e35f6b87f43a083947aa978886c798ebbfd9789a
+images/vendor.img;EXTRACT_ONLY|91204739038a29a2800ddd815e3e1aa281c4570e
+
+# First-stage fstabs - from mblu21 U01005 vendor_boot
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_14c10_go|e07d31bc0b2bff426f2d278588e38c62506c0d9b
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_1h10|e07d31bc0b2bff426f2d278588e38c62506c0d9b
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_1h10_go|e07d31bc0b2bff426f2d278588e38c62506c0d9b
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_4h10|e07d31bc0b2bff426f2d278588e38c62506c0d9b
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_4h10_go|e07d31bc0b2bff426f2d278588e38c62506c0d9b
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_6h10|e07d31bc0b2bff426f2d278588e38c62506c0d9b|c8be596e92e3e8c0e95ccd0a00b7f4f8db5e80c9
+vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_6h10_go|e07d31bc0b2bff426f2d278588e38c62506c0d9b
+
+# Ueventd rules - from mblu21 U01005 vendor_boot
+vendor_ramdisk/ueventd.ums9230_14c10_go.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+vendor_ramdisk/ueventd.ums9230_1h10.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+vendor_ramdisk/ueventd.ums9230_1h10_go.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+vendor_ramdisk/ueventd.ums9230_4h10.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+vendor_ramdisk/ueventd.ums9230_4h10_go.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+vendor_ramdisk/ueventd.ums9230_6h10.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+vendor_ramdisk/ueventd.ums9230_6h10_go.rc|dd6292103dc11b146590e6e60993d79a1b36dbb8
+
+# GKI modules signed by Google, identical to the ci.android.com kernel_aarch64 build 12096863 system_dlkm staging archive - from mblu21 U01005 system_dlkm
+system_dlkm/lib/modules/kernel/drivers/block/zram/zram.ko;EXTRACT_ONLY|eb0f1a8f1c22c72f34c6287fa062aefbc7edcdb9
+system_dlkm/lib/modules/kernel/mm/zsmalloc.ko;EXTRACT_ONLY|6a6aba52d3e5340eb51ebbf07715254d601335e3
+
+# Revo ODM kernel modules without published source - from mblu21 U01005 vendor_dlkm
+vendor_dlkm/lib/modules/flash_ic_gpio.ko;EXTRACT_ONLY|dbc0541a076e71bcd4f22249377e0cff9c8ddbe8
+vendor_dlkm/lib/modules/focaltech_spi_v4_1.ko;EXTRACT_ONLY|0ac5e8e49e22c6a939f82123b974da78146ed179
+vendor_dlkm/lib/modules/psc2965-charger.ko;EXTRACT_ONLY|489c3bd23e13f6da76e665ebfb53ed8453ad778e
+vendor_dlkm/lib/modules/revofp_silead.ko;EXTRACT_ONLY|4f27cc68d5680d2c70ce9440d082c41a7f26be23
+vendor_dlkm/lib/modules/spi_ilitek.ko;EXTRACT_ONLY|b84664004b14bae5187b88b2fa28dbcaeab0236c
