@@ -27,7 +27,7 @@ Tested on one M416H. Every row names the build it was tested with; a component w
 | Unisoc IMS stack (`com.spreadtrum.ims` bound as MMTEL, `ims_bridged`, `srmi_proxyd`, RadioInteractor `irit`): 0 SELinux denials and 0 crashes for these domains after 17 minutes | runs | pre-release r7, 2026-11-03 |
 | VoLTE, Telkomsel SIM | **network/SIM limitation, not tested**: the modem has IMS voice on (`AT+CAVIMS: 1`, IMS-preferred voice domain, IMS APN at cid 11) but the network reports IMS voice over PS not supported (`AT+CIREP: 1,0`, `mVopsSupport = 3`), so IMS never registers. The stock firmware never showed VoLTE with this SIM either. Retest with another operator's SIM. | r7, 2026-11-03 |
 
-`79d312d` and `0d92969` are not on `lineage-24.0` yet, so a build of this branch still boots with SELinux permissive and Volume Down can reset the phone.
+A build boots with SELinux permissive unless `MBLU21_ENFORCING=true` is set in the build environment; enforcing becomes the default once an enforcing build logs no blocked access through the full test matrix.
 
 Battery deep sleep (≤ 1%/hour over 8 hours with the screen off) was not measured: the overnight run was skipped by Zhafron's decision on 2026-11-03, so there is no drain data.
 
@@ -103,6 +103,14 @@ An update replaces `init_boot` on the other slot, so root is lost unless it is p
 ## SELinux
 
 The stock vendor policy is compiled for platform version 33.0, so rules for stock vendor domains cannot come from `BOARD_VENDOR_SEPOLICY_DIRS` (the vendor image is stock) or `BOARD_ODM_SEPOLICY_DIRS` (it versions against the current platform). `odm/odm_sepolicy.cil` holds them in CIL against the `_33_0` attributes, like the stock `odm_sepolicy.cil`; init compiles it with the rest of the split policy at boot. Rules and labels for platform domains live in `sepolicy/private` on `system_ext`.
+
+Some denied accesses are hidden with `dontaudit` instead of allowed, because nothing needs them:
+
+- `hal_audio_default` on `audio_prop`, `rild` on `system_prop` and `surfaceflinger` on `vendor_default_prop`: vendor code looks up the `persist.audio.*` debug switches, `persist.sys.c2k.autoswitch_enabled` and `persist.vendor.gpu.fbc`. Nothing sets these properties on this build, so a denied lookup returns the same default value. Allowing the reads would break the Treble property neverallows, and the stock enforcing policy denies them too.
+- `hal_graphics_composer_default` searching `/data/data`: the Mali driver looks for `/data/data/com.mali.testjava/mali_debug.config`, a debug file that does not exist.
+- `secure_element` writing in its cache, which has no app data label: ART tries to save a runtime app image in `/data/user_de/0/com.android.se/cache/oat_primary`. The app runs without it.
+
+The `kernel` domain denials for `/metadata/ota/state` and `/sys/firmware/devicetree/base/firmware/android` happen while init finishes the snapuserd transition, after the policy is loaded and before enforcing is switched on, so they are always logged with `permissive=1` and block nothing.
 
 ## IMS
 
