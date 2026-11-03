@@ -23,9 +23,9 @@ Tested on one M416H. Every row names the build it was tested with; a component w
 | Voice calls (two-way audio) and SMS send/receive, Telkomsel | works | local build with `79d312d`, 2026-11-03 |
 | Volume Down in Android and Lineage Recovery without resetting the phone | works | local build with `0d92969` (branch `zha4374-selinux-voldown`), 2026-11-03 |
 | Emergency call, GPS, MTP, USB tethering | works (manual test by Zhafron) | 2026-11-03 |
-| A/B OTA through the LineageOS Updater, data kept, root re-patched with `ksud boot-patch` before the reboot | works: r3 to `_b`, r4 to `_a`, r5 to `_b`, r6 to `_a` | pre-releases r3-r6 (branch `zha4555-volte`), 2026-11-03 |
-| Unisoc IMS stack (`com.spreadtrum.ims` bound as MMTEL, `ims_bridged`, `srmi_proxyd`, RadioInteractor `irit`) under SELinux enforcing, no denials, no crashes | runs | pre-release r6, 2026-11-03 |
-| VoLTE registration, Telkomsel | **not registered**: the network reports IMS voice over PS not supported (`LteVopsSupportInfo mVopsSupport = 3`), on the stock firmware as well | r6 and stock U01005, 2026-11-03 |
+| A/B OTA through the LineageOS Updater, data kept, root re-patched with `ksud boot-patch` before the reboot | works: r3 to `_b`, r4 to `_a`, r5 to `_b`, r6 to `_a`, r7 to `_b` | pre-releases r3-r7 (branch `zha4555-volte`), 2026-11-03 |
+| Unisoc IMS stack (`com.spreadtrum.ims` bound as MMTEL, `ims_bridged`, `srmi_proxyd`, RadioInteractor `irit`): 0 SELinux denials and 0 crashes for these domains after 17 minutes | runs | pre-release r7, 2026-11-03 |
+| VoLTE, Telkomsel SIM | **network/SIM limitation, not tested**: the modem has IMS voice on (`AT+CAVIMS: 1`, IMS-preferred voice domain, IMS APN at cid 11) but the network reports IMS voice over PS not supported (`AT+CIREP: 1,0`, `mVopsSupport = 3`), so IMS never registers. The stock firmware never showed VoLTE with this SIM either. Retest with another operator's SIM. | r7, 2026-11-03 |
 
 `79d312d` and `0d92969` are not on `lineage-24.0` yet, so a build of this branch still boots with SELinux permissive and Volume Down can reset the phone.
 
