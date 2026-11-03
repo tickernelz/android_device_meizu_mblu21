@@ -81,25 +81,25 @@ TARGET_KERNEL_EXT_MODULES := \
     kernel5.15/microarray \
     kernel5.15/npu/vdsp \
     common/camera/power \
+    common/camera/flash/flash_drv \
+    common/camera/sensor \
+    kernel5.15/dmabufheap \
     common/camera/cam_sys \
     common/camera/cpp \
     common/camera/flash/ocp8137 \
     common/camera/flash/ocp81375 \
-    common/camera/flash/flash_drv \
-    common/camera/sensor \
     common/camera/mmdvfs \
+    kernel5.15/wcn/bsp/unisoc_wcn_bsp \
     kernel5.15/wcn/fm/driver \
     kernel5.15/wcn/bluetooth/driver \
     common/io/block \
     common/io/iowait \
-    kernel5.15/wcn/bsp/unisoc_wcn_bsp \
     kernel5.15/wcn/gnss/unisoc_gnss/gnss_common_ctl \
     kernel5.15/wcn/gnss/unisoc_gnss/gnss_dbg \
     kernel5.15/wcn/gnss/unisoc_gnss/gnss_pmnotify_ctl \
     kernel5.15/wcn/wlan/wlan_combo \
     kernel5.15/display/gsp \
     kernel5.15/display/dispc \
-    kernel5.15/dmabufheap \
     kernel5.15/video/sprd-vpu \
     kernel5.15/video/sprd-vsp-power \
     kernel5.15/video/sprd-jpg \
