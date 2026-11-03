@@ -26,8 +26,6 @@ TARGET_NO_RADIOIMAGE := true
 
 AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
-    boot \
-    dtbo \
     init_boot \
     odm \
     product \
