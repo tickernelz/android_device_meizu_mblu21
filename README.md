@@ -99,7 +99,7 @@ An update replaces `init_boot` on the other slot, so root is lost unless it is p
 
 ## IMS
 
-The stock IMS stack lives on `system_ext` and depends on Unisoc additions to the framework. `extract-ims.py <extracted_partitions_dir>` regenerates it into the vendor tree from the stock U01005 partitions, checked against `ims-inputs.sha256`:
+The stock IMS stack lives on `system_ext` and depends on Unisoc additions to the framework. `extract-files.py` extracts it with the other blobs (the `IMS` sections of `proprietary-files.txt`), and blob fixups rebuild the two apps:
 
 - `ims.apk` (`com.spreadtrum.ims`) and `radio_interactor_service.apk` get the stock boot jars they need merged in as extra dex files, and their calls into Unisoc-only telephony APIs (`TelephonyMetrics`, `ServiceStateTracker.startUpdateState`) removed. The build signs both with the platform key so they keep `android.uid.phone`.
 - `ims_bridged`, `srmi_proxyd` and their libraries are copied unchanged.

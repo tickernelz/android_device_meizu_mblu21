@@ -37,3 +37,25 @@ vendor_dlkm/lib/modules/focaltech_spi_v4_1.ko;EXTRACT_ONLY|0ac5e8e49e22c6a939f82
 vendor_dlkm/lib/modules/psc2965-charger.ko;EXTRACT_ONLY|489c3bd23e13f6da76e665ebfb53ed8453ad778e
 vendor_dlkm/lib/modules/revofp_silead.ko;EXTRACT_ONLY|4f27cc68d5680d2c70ce9440d082c41a7f26be23
 vendor_dlkm/lib/modules/spi_ilitek.ko;EXTRACT_ONLY|b84664004b14bae5187b88b2fa28dbcaeab0236c
+
+# IMS: Unisoc boot jars merged into the apps by extract-files.py - from mblu21 U01005 system and system_ext
+system/framework/radio_interactor_common.jar;EXTRACT_ONLY|35f0dac4fe57079913ef7abc482ddca38c5d6888
+system/framework/unisoc_ims_common.jar;EXTRACT_ONLY|a03a56bea908b430234df30a6b9ab4b93089e521
+system_ext/framework/unisoc-framework.jar;EXTRACT_ONLY|f185135a0d4782fd773600ae6a5c2790899c1fd8
+
+# IMS - from mblu21 U01005 system_ext
+system_ext/bin/ims_bridged|17cacb1ec237bd2e2092e9c8991377853a53083b
+system_ext/bin/srmi_proxyd|57b701731a9096b0025a41cbdc0bdd547031e1d4
+system_ext/etc/init/ims_bridged.rc|b0ed4bfba6106c88768306fb2aa25d9d414418dd
+system_ext/etc/init/srmi_proxyd.rc|3f59409d892dfb922e6f3558d728b1c4c9a260b6
+system_ext/etc/permissions/com.spreadtrum.ims.xml|320828ae0729a1a96449cac2a939b79a1e172820
+system_ext/lib/libimsbrd.so|9266baac98d67ba7e399c62afc70067db19c6dd6
+system_ext/lib/libsrmi.so|9063c88f0a3c0886b4db7d074cb8a33df9b7cbd0
+system_ext/lib/libsrmiservice.so|4806ea019a345215a96dbd31377d44166044349e
+system_ext/lib/vendor.unisoc.frameworks.srmi-V1-ndk.so|8c91b77f04e4555357bc18535fa1fb5676d0b4b7
+system_ext/lib64/libimsbrd.so|ec3bd5f252949bab3f3e91d24d8431a4adb19117
+system_ext/lib64/libsrmi.so|cc73f28067ebb7e459b3760d6a1ebd1020197e50
+system_ext/lib64/libsrmiservice.so|f7af981357c254bc1b530b570a3c1116b5de2808
+system_ext/lib64/vendor.unisoc.frameworks.srmi-V1-ndk.so|becac49bf4d8d5b722c7a3706fa9427f94efa319
+system_ext/priv-app/ims/ims.apk|6456d31bdf4f921e8463e14477b932b355b51891|6f28fd2effaa06c5e2b408770f3fab859e07e7e6
+system_ext/priv-app/radio_interactor_service/radio_interactor_service.apk|42a4c2c13c38a782aaa98265d737167106336297|0c1d6475373976882bd5df476483a5e27958c4d9

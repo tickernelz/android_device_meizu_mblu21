@@ -5,12 +5,14 @@
 #
 
 import os
+import re
 import shutil
 import struct
 import sys
 from os import path
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import List, Optional, Tuple
 
 from extract_utils.args import ArgsSource, parse_args
 from extract_utils.extract import ExtractCtx, extract_fns_user_type
@@ -19,7 +21,9 @@ from extract_utils.extract_recovery import (
     parse_mkbootimg_fragments,
     unpack_bootimg,
 )
+from extract_utils.file import File
 from extract_utils.fixups_blob import (
+    BlobFixupCtx,
     blob_fixup,
     blob_fixups_user_type,
 )
@@ -28,6 +32,7 @@ from extract_utils.main import (
     ExtractUtils,
     ExtractUtilsModule,
 )
+from extract_utils.tools import apktool_path, java_path
 from extract_utils.utils import run_cmd
 
 BLOCK_DEVICE_PARTITIONS = {
@@ -174,6 +179,119 @@ def extract_modem_avb_key(ctx: ExtractCtx, file_path: str, dump_dir: str):
     return None
 
 
+TELEPHONY_METRICS = 'Lcom/android/internal/telephony/metrics/TelephonyMetrics;'
+HIDDENAPI_FLAG = re.compile(
+    r'^(whitelist|blacklist|greylist(-max-\w+)?|test-api|core-platform-api|max-target-\w+|sdk|unsupported|blocked|conditional)$'
+)
+
+
+def apktool(*args: str):
+    run_cmd([java_path, '-jar', apktool_path, *args])
+
+
+def read_text(file_path: str):
+    with open(file_path) as f:
+        return f.read()
+
+
+def write_text(file_path: str, text: str):
+    with open(file_path, 'w') as f:
+        f.write(text)
+
+
+def drop_telephony_metrics(smali_dir: str):
+    metrics = re.escape(TELEPHONY_METRICS)
+    for name in ('ImsRadioInterface.smali', 'ImsRadioInterface$RilHandler.smali'):
+        file_path = path.join(smali_dir, 'com/spreadtrum/ims', name)
+        text = re.sub(
+            r'invoke-static \{\}, ' + metrics + r'->getInstance\(\)' + metrics
+            + r'\n\n    move-result-object (v\d+)',
+            r'const/4 \1, 0x0',
+            read_text(file_path),
+        )
+        text = re.sub(
+            r'\n    invoke-virtual(/range)? \{[^}]*\}, ' + metrics + r'->writeOn\w+\([^)]*\)V\n',
+            '\n',
+            text,
+        )
+        assert not re.search(
+            r'invoke-[\w/]+ \{[^}]*\}, ' + metrics + '->', text
+        ), f'{name}: TelephonyMetrics call left'
+        write_text(file_path, text.replace(TELEPHONY_METRICS, 'Ljava/lang/Object;'))
+    for root, _, files in os.walk(smali_dir):
+        for name in files:
+            assert TELEPHONY_METRICS not in read_text(
+                path.join(root, name)
+            ), f'{name}: TelephonyMetrics reference left'
+
+
+def drop_call(smali_dir: str, smali_path: str, method: str):
+    file_path = path.join(smali_dir, smali_path)
+    text, count = re.subn(
+        r'\n    invoke-virtual(/range)? \{[^}]*\}, ' + re.escape(method) + r'\n',
+        '\n',
+        read_text(file_path),
+    )
+    assert count == 1, f'{smali_path}: expected one call to {method}, found {count}'
+    write_text(file_path, text)
+
+
+def strip_hiddenapi_flags(smali_dir: str):
+    for root, _, files in os.walk(smali_dir):
+        for name in files:
+            file_path = path.join(root, name)
+            lines = read_text(file_path).split('\n')
+            for i, line in enumerate(lines):
+                if line.startswith(('.method ', '.field ')):
+                    tokens = line.split(' ')
+                    member = next(
+                        j for j, t in enumerate(tokens) if '(' in t or ':' in t
+                    )
+                    kept = [t for t in tokens[1:member] if not HIDDENAPI_FLAG.match(t)]
+                    lines[i] = ' '.join([tokens[0], *kept, *tokens[member:]])
+            write_text(file_path, '\n'.join(lines))
+
+
+def merge_boot_jars(
+    ctx: BlobFixupCtx,
+    file: File,
+    file_path: str,
+    *args,
+    jars: List[Tuple[str, Optional[str]]],
+    dropped_calls: List[Tuple[str, str]],
+    tmp_dir: Optional[str] = None,
+    **kwargs,
+):
+    assert tmp_dir is not None
+    proprietary_dir = file_path[: -len(file.dst)]
+    app_dir = path.join(tmp_dir, 'app')
+    apktool('d', '-r', '-f', file_path, '-o', app_dir)
+    smali_dir = path.join(app_dir, 'smali')
+    if file.dst == IMS_APK:
+        drop_telephony_metrics(smali_dir)
+    for smali_path, method in dropped_calls:
+        drop_call(smali_dir, smali_path, method)
+    for index, (jar, only) in enumerate(jars, start=2):
+        jar_dir = path.join(tmp_dir, f'jar{index}')
+        apktool('d', '-r', '-f', path.join(proprietary_dir, jar), '-o', jar_dir)
+        src = path.join(jar_dir, 'smali')
+        dst = path.join(app_dir, f'smali_classes{index}')
+        if only is None:
+            shutil.copytree(src, dst)
+        else:
+            os.makedirs(path.join(dst, path.dirname(only)))
+            for name in os.listdir(path.join(src, path.dirname(only))):
+                if re.fullmatch(re.escape(path.basename(only)) + r'(\$\w+)?\.smali', name):
+                    shutil.copy(path.join(src, path.dirname(only), name), path.join(dst, path.dirname(only)))
+        strip_hiddenapi_flags(dst)
+    apktool('b', app_dir, '-o', file_path)
+
+
+IMS_APK = 'system_ext/priv-app/ims/ims.apk'
+RADIO_INTERACTOR_APK = 'system_ext/priv-app/radio_interactor_service/radio_interactor_service.apk'
+RADIO_INTERACTOR_COMMON = 'system/framework/radio_interactor_common.jar'
+
+
 def pull_partitions_over_adb(dump_dir: str):
     run_cmd(['adb', 'wait-for-device'])
     run_cmd(['adb', 'root'])
@@ -204,6 +322,27 @@ extract_fns: extract_fns_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
+    IMS_APK: blob_fixup()
+        .call(
+            merge_boot_jars,
+            jars=[
+                ('system/framework/unisoc_ims_common.jar', None),
+                (RADIO_INTERACTOR_COMMON, None),
+                ('system_ext/framework/unisoc-framework.jar', 'com/android/ims/internal/ImsCallForwardInfoEx'),
+            ],
+            dropped_calls=[],
+        ),
+    RADIO_INTERACTOR_APK: blob_fixup()
+        .call(
+            merge_boot_jars,
+            jars=[(RADIO_INTERACTOR_COMMON, None)],
+            dropped_calls=[
+                (
+                    'com/android/unisoc/telephony/server/ExtRadioNetworkIndication.smali',
+                    'Lcom/android/internal/telephony/ServiceStateTracker;->startUpdateState(IIII)V',
+                ),
+            ],
+        ),
     'vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_6h10': blob_fixup()
         .regex_replace(r',avb(_keys)?=[^,\s]*', ''),
 }  # fmt: skip
