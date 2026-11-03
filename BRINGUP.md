@@ -61,8 +61,14 @@ debug behaviour on:
   `keys/adb_keys` is gitignored. Nothing is copied when the variable is empty,
   which is the default.
 
-SELinux is enforcing by default. `MBLU21_BRINGUP=1` also adds
-`androidboot.selinux=permissive`.
+`androidboot.selinux=permissive` is still unconditional: SELinux stays
+permissive until enforcing can cover the vendor domains this platform touches.
+A fresh enforcing boot blocks 162 accesses (vendor_init property sets from the
+stock vendor/build.prop, audio_prop reads, composer graphics props, power HAL
+sys_nice, rild system_prop, system_suspend wakeup sysfs), and those denials come
+from vendor/ODM domains. `vendor.img` and `odm.img` are the stock prebuilt
+images here, so `BOARD_VENDOR_SEPOLICY_DIRS` is staged but never packaged: the
+policy has to live in the system_ext private directory to reach Android.
 
 Measured cost of `ignore_loglevel` here: the console takes 29 KB/s during the
 20-30 s boot bucket (634 KB between 8 s and 50 s) against 249-282 B/s idle,
