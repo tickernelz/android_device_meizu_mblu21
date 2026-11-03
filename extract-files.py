@@ -331,7 +331,8 @@ blob_fixups: blob_fixups_user_type = {
                 ('system_ext/framework/unisoc-framework.jar', 'com/android/ims/internal/ImsCallForwardInfoEx'),
             ],
             dropped_calls=[],
-        ),
+        )
+        .stripzip(),
     RADIO_INTERACTOR_APK: blob_fixup()
         .call(
             merge_boot_jars,
@@ -342,7 +343,8 @@ blob_fixups: blob_fixups_user_type = {
                     'Lcom/android/internal/telephony/ServiceStateTracker;->startUpdateState(IIII)V',
                 ),
             ],
-        ),
+        )
+        .stripzip(),
     'vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_6h10': blob_fixup()
         .regex_replace(r',avb(_keys)?=[^,\s]*', ''),
 }  # fmt: skip
