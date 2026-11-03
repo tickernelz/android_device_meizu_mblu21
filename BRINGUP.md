@@ -61,8 +61,9 @@ debug behaviour on:
   `keys/adb_keys` is gitignored. Nothing is copied when the variable is empty,
   which is the default.
 
-SELinux is enforcing by default. `MBLU21_BRINGUP=1` also adds
-`androidboot.selinux=permissive`.
+`androidboot.selinux=permissive` is still unconditional: SELinux stays
+permissive until the device sepolicy covers the vendor domains this platform
+touches (measured: 162 denials at boot with enforcing, all blocked).
 
 Measured cost of `ignore_loglevel` here: the console takes 29 KB/s during the
 20-30 s boot bucket (634 KB between 8 s and 50 s) against 249-282 B/s idle,
