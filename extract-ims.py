@@ -17,11 +17,17 @@ ANDROID_ROOT = os.environ.get("ANDROID_ROOT", os.path.join(MY_DIR, "..", "..", "
 VENDOR_DIR = os.path.join(ANDROID_ROOT, "vendor", "meizu", "mblu21", "proprietary")
 APKTOOL = os.environ.get("APKTOOL", "apktool")
 
-APK = "system_ext/priv-app/ims/ims.apk"
-JARS = {
-    "smali_classes2": ("system/system/framework/unisoc_ims_common.jar", None),
-    "smali_classes3": ("system/system/framework/radio_interactor_common.jar", None),
-    "smali_classes4": ("system_ext/framework/unisoc-framework.jar", "com/android/ims/internal/ImsCallForwardInfoEx"),
+IMS_APK = "system_ext/priv-app/ims/ims.apk"
+RADIO_INTERACTOR_COMMON = "system/system/framework/radio_interactor_common.jar"
+APPS = {
+    IMS_APK: {
+        "smali_classes2": ("system/system/framework/unisoc_ims_common.jar", None),
+        "smali_classes3": (RADIO_INTERACTOR_COMMON, None),
+        "smali_classes4": ("system_ext/framework/unisoc-framework.jar", "com/android/ims/internal/ImsCallForwardInfoEx"),
+    },
+    "system_ext/priv-app/radio_interactor_service/radio_interactor_service.apk": {
+        "smali_classes2": (RADIO_INTERACTOR_COMMON, None),
+    },
 }
 COPIES = [
     "system_ext/bin/ims_bridged",
@@ -100,26 +106,28 @@ def main():
         sys.exit(f"usage: {sys.argv[0]} <extracted_partitions_dir>")
     dump = sys.argv[1]
     verify_inputs(dump)
-    with tempfile.TemporaryDirectory() as work:
-        app = os.path.join(work, "ims")
-        apktool_decode(os.path.join(dump, APK), app)
-        drop_telephony_metrics(os.path.join(app, "smali"))
-        for dex_dir, (jar, only) in JARS.items():
-            jar_dir = os.path.join(work, dex_dir)
-            apktool_decode(os.path.join(dump, jar), jar_dir)
-            src = os.path.join(jar_dir, "smali")
-            dst = os.path.join(app, dex_dir)
-            if only is None:
-                shutil.copytree(src, dst)
-            else:
-                os.makedirs(os.path.join(dst, os.path.dirname(only)))
-                for name in os.listdir(os.path.join(src, os.path.dirname(only))):
-                    if re.fullmatch(re.escape(os.path.basename(only)) + r"(\$\w+)?\.smali", name):
-                        shutil.copy(os.path.join(src, os.path.dirname(only), name), os.path.join(dst, os.path.dirname(only)))
-            strip_hiddenapi_flags(dst)
-        out_apk = os.path.join(VENDOR_DIR, APK)
-        os.makedirs(os.path.dirname(out_apk), exist_ok=True)
-        subprocess.run([APKTOOL, "b", app, "-o", out_apk], check=True, stdout=subprocess.DEVNULL)
+    for apk, jars in APPS.items():
+        with tempfile.TemporaryDirectory() as work:
+            app = os.path.join(work, "app")
+            apktool_decode(os.path.join(dump, apk), app)
+            if apk == IMS_APK:
+                drop_telephony_metrics(os.path.join(app, "smali"))
+            for dex_dir, (jar, only) in jars.items():
+                jar_dir = os.path.join(work, dex_dir)
+                apktool_decode(os.path.join(dump, jar), jar_dir)
+                src = os.path.join(jar_dir, "smali")
+                dst = os.path.join(app, dex_dir)
+                if only is None:
+                    shutil.copytree(src, dst)
+                else:
+                    os.makedirs(os.path.join(dst, os.path.dirname(only)))
+                    for name in os.listdir(os.path.join(src, os.path.dirname(only))):
+                        if re.fullmatch(re.escape(os.path.basename(only)) + r"(\$\w+)?\.smali", name):
+                            shutil.copy(os.path.join(src, os.path.dirname(only), name), os.path.join(dst, os.path.dirname(only)))
+                strip_hiddenapi_flags(dst)
+            out_apk = os.path.join(VENDOR_DIR, apk)
+            os.makedirs(os.path.dirname(out_apk), exist_ok=True)
+            subprocess.run([APKTOOL, "b", app, "-o", out_apk], check=True, stdout=subprocess.DEVNULL)
     for path in COPIES:
         dst = os.path.join(VENDOR_DIR, path)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
