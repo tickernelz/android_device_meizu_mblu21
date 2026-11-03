@@ -22,10 +22,14 @@ Tested on one M416H. Every row names the build it was tested with; a component w
 | SELinux enforcing: boot, Wi-Fi, LTE, Bluetooth on, camera, no crashes | works | local build with `79d312d` (branch `zha4374-selinux-voldown`), 2026-11-03 |
 | Voice calls (two-way audio) and SMS send/receive, Telkomsel | works | local build with `79d312d`, 2026-11-03 |
 | Volume Down in Android and Lineage Recovery without resetting the phone | works | local build with `0d92969` (branch `zha4374-selinux-voldown`), 2026-11-03 |
+| Emergency call, GPS, MTP, USB tethering | works (manual test by Zhafron) | 2026-11-03 |
+| A/B OTA through the LineageOS Updater, data kept, root re-patched with `ksud boot-patch` before the reboot | works: r3 to `_b`, r4 to `_a`, r5 to `_b`, r6 to `_a` | pre-releases r3-r6 (branch `zha4555-volte`), 2026-11-03 |
+| Unisoc IMS stack (`com.spreadtrum.ims` bound as MMTEL, `ims_bridged`, `srmi_proxyd`, RadioInteractor `irit`) under SELinux enforcing, no denials, no crashes | runs | pre-release r6, 2026-11-03 |
+| VoLTE registration, Telkomsel | **not registered**: the network reports IMS voice over PS not supported (`LteVopsSupportInfo mVopsSupport = 3`), on the stock firmware as well | r6 and stock U01005, 2026-11-03 |
 
 `79d312d` and `0d92969` are not on `lineage-24.0` yet, so a build of this branch still boots with SELinux permissive and Volume Down can reset the phone.
 
-Not tested yet: Bluetooth pairing, VoLTE, outdoor GPS fix, battery deep sleep, OTA, MTP, speaker/earpiece/headset one by one, camera flash, fingerprint (the sensor on the test phone is broken in hardware).
+Not tested yet: Bluetooth pairing, battery deep sleep, speaker/earpiece/headset one by one, camera flash, fingerprint (the sensor on the test phone is broken in hardware).
 
 ## Layout
 
@@ -45,6 +49,21 @@ All rebuilt and re-signed images use the public AOSP test key (`external/avb/tes
 The device has no `recovery` partition: recovery and fastbootd live in `vendor_boot`.
 
 The stock images live in [android_vendor_meizu_mblu21](https://github.com/tickernelz/android_vendor_meizu_mblu21).
+
+## OTA
+
+The A/B payload carries `init_boot`, `vendor_boot` and the dynamic partitions only. `boot`, `dtbo` and every `vbmeta*` are left out: the bootloader boots only the Meizu-signed `vbmeta`, and both slots already hold the stock `boot`, `dtbo` and `vbmeta` images. The LineageOS Updater reads `updater/mblu21.json` from [lineage_build_mblu21](https://github.com/tickernelz/lineage_build_mblu21) (`lineage.updater.uri` in `system.prop`).
+
+An update replaces `init_boot` on the other slot, so root is lost unless it is patched again before the reboot, for SukiSU Ultra or KernelSU: `ksud boot-patch -b <init_boot of the other slot> --partition init_boot`, then write the result back to that slot.
+
+## IMS
+
+The stock IMS stack lives on `system_ext` and depends on Unisoc additions to the framework. `extract-ims.py <extracted_partitions_dir>` regenerates it into the vendor tree from the stock U01005 partitions, checked against `ims-inputs.sha256`:
+
+- `ims.apk` (`com.spreadtrum.ims`) and `radio_interactor_service.apk` get the stock boot jars they need merged in as extra dex files, and their calls into Unisoc-only telephony APIs (`TelephonyMetrics`, `ServiceStateTracker.startUpdateState`) removed. The build signs both with the platform key so they keep `android.uid.phone`.
+- `ims_bridged`, `srmi_proxyd` and their libraries are copied unchanged.
+
+`sepolicy/private/compat/33.0/33.0.cil` maps `ims_bridged`, `srmi_proxyd` and `fwk_srmi_service` onto the `_33_0` attributes the stock vendor policy already grants, as the stock system_ext mapping does.
 
 ## Build
 
