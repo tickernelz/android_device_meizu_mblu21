@@ -55,6 +55,7 @@ AB_OTA_POSTINSTALL_CONFIG += \
 PRODUCT_PACKAGES += \
     CarrierConfigMblu21 \
     FrameworksResMblu21 \
+    SettingsResMblu21 \
     TeleServiceMblu21
 
 PRODUCT_PACKAGES += \

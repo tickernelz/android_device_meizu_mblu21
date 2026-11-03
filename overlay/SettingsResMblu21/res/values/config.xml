@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <bool name="config_face_enroll_hal_owns_camera">true</bool>
+    <integer name="face_preview_width">960</integer>
+    <integer name="face_preview_height">720</integer>
+</resources>
