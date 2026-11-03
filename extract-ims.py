@@ -45,6 +45,15 @@ COPIES = [
     "system_ext/lib64/vendor.unisoc.frameworks.srmi-V1-ndk.so",
 ]
 
+DROPPED_CALLS = {
+    "system_ext/priv-app/radio_interactor_service/radio_interactor_service.apk": [
+        (
+            "com/android/unisoc/telephony/server/ExtRadioNetworkIndication.smali",
+            "Lcom/android/internal/telephony/ServiceStateTracker;->startUpdateState(IIII)V",
+        ),
+    ],
+}
+
 METRICS = "Lcom/android/internal/telephony/metrics/TelephonyMetrics;"
 HIDDENAPI_FLAG = re.compile(
     r"^(whitelist|blacklist|greylist(-max-\w+)?|test-api|core-platform-api|max-target-\w+|sdk|unsupported|blocked|conditional)$"
@@ -85,6 +94,18 @@ def drop_telephony_metrics(smali_dir):
                     sys.exit(f"{name}: TelephonyMetrics reference left")
 
 
+def drop_calls(smali_dir, calls):
+    for path, method in calls:
+        path = os.path.join(smali_dir, path)
+        with open(path) as f:
+            text = f.read()
+        text, count = re.subn(r"\n    invoke-virtual(/range)? \{[^}]*\}, " + re.escape(method) + r"\n", "\n", text)
+        if count != 1:
+            sys.exit(f"{path}: expected one call to {method}, found {count}")
+        with open(path, "w") as f:
+            f.write(text)
+
+
 def strip_hiddenapi_flags(smali_dir):
     for root, _, files in os.walk(smali_dir):
         for name in files:
@@ -112,6 +133,7 @@ def main():
             apktool_decode(os.path.join(dump, apk), app)
             if apk == IMS_APK:
                 drop_telephony_metrics(os.path.join(app, "smali"))
+            drop_calls(os.path.join(app, "smali"), DROPPED_CALLS.get(apk, []))
             for dex_dir, (jar, only) in jars.items():
                 jar_dir = os.path.join(work, dex_dir)
                 apktool_decode(os.path.join(dump, jar), jar_dir)
