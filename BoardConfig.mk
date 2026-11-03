@@ -128,7 +128,7 @@ BOARD_KERNEL_SEPARATED_DTBO := true
 BOARD_DTBO_CFG := $(DEVICE_PATH)/configs/dtbo.cfg
 
 BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 bootconfig
-BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10 androidboot.selinux=permissive
+BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10
 BOARD_DTB_CFG := $(DEVICE_PATH)/configs/dtb.cfg
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_KERNEL_BASE := 0x00000000
@@ -173,7 +173,7 @@ BOARD_GROUP_UNISOC_PARTITION_LIST := \
     vendor_dlkm
 
 BOARD_PREBUILT_VENDORIMAGE := $(VENDOR_PATH)/proprietary/images/vendor.img
-BOARD_PREBUILT_ODMIMAGE := $(VENDOR_PATH)/proprietary/images/odm.img
+BOARD_PREBUILT_ODMIMAGE := $(PRODUCT_OUT)/obj/PACKAGING/mblu21_odm_intermediates/odm.img
 
 BOARD_USES_VENDORIMAGE := true
 BOARD_USES_ODMIMAGE := true

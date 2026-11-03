@@ -35,14 +35,15 @@ Not tested yet: Bluetooth pairing, speaker/earpiece/headset one by one, camera f
 
 ## Layout
 
-The kernel image is the stock Google GKI build; every kernel module the vendor ships is built from source except five Revo ODM modules:
+The kernel image is the stock Google GKI build; every kernel module the vendor ships is built from source:
 
 | Image | Source |
 |---|---|
 | `boot` | stock, carrying the `Image` of Google GKI build `12096863` (`android13-5.15-2024-07`) byte for byte, re-signed |
 | `vendor_boot` | built: DTB from `kernel/meizu/ums9230`, stock cmdline and bootconfig, first-stage modules built from source in the stock load order, stock fstabs and ueventd rules in the platform ramdisk, plus Lineage Recovery with fastbootd as a separate recovery ramdisk |
 | `dtbo` | built from `kernel/meizu/ums9230`; its nine overlays are byte for byte the stock ones |
-| `vendor`, `odm` | stock images, unchanged |
+| `vendor` | stock image, unchanged |
+| `odm` | the stock image rebuilt by `odm/build_odm.py` with three changes: `odm_sepolicy.cil` gets the rules in `odm/odm_sepolicy.cil` appended, the stale `precompiled_sepolicy` is removed, and `firmware/` gets the touch panel firmware (see below). Every other file keeps its stock content, owner, mode and SELinux label; the script checks this on the image it writes |
 | `vendor_dlkm` | built: modules from `kernel/meizu/ums9230` and `kernel/meizu/ums9230-modules` in the stock load order |
 | `system_dlkm` | built from the `zram` and `zsmalloc` modules of GKI build `12096863`, signed by Google |
 | `init_boot`, `system`, `system_ext`, `product` | built from LineageOS source |
@@ -67,7 +68,7 @@ Every proprietary file is listed in `proprietary-files.txt` and `proprietary-fir
 | `proprietary/images/` | stock `boot` without its AVB footer, stock `vendor`, `odm` |
 | `proprietary/vendor_ramdisk/` | fstabs and ueventd rules from the platform ramdisk of `vendor_boot`; the `fstab.ums9230_6h10` fixup removes its `avb` flags |
 | `proprietary/system_dlkm/` | `zram.ko` and `zsmalloc.ko`, identical to the `system_dlkm` staging archive of GKI build `12096863` on ci.android.com |
-| `proprietary/vendor_dlkm/` | the Revo ODM modules `flash_ic_gpio`, `focaltech_spi_v4_1`, `psc2965-charger`, `revofp_silead`, `spi_ilitek`, which have no published source; `modules/prebuilt` adds them to the kernel module build so they keep their stock place in `modules.load` |
+| `proprietary/vendor_dlkm/` | the stock Revo ODM modules, never installed: the stock `spi_ilitek.ko` and `focaltech_spi_v4_1.ko` carry the touch panel firmware built in, and `odm/build_odm.py` copies it out to `/odm/firmware/ILITEK_FW_DEF.ili` and `/odm/firmware/focaltech_ts_fw_.bin`, where the source-built drivers load it with `request_firmware()` |
 | `proprietary/avb/unisoc_modem.avbpubkey` | public key in the AVB footer of `l_modem`, the key `vbmeta` uses for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 | `radio/` | stock signed `l_modem`, `l_ldsp`, `l_gdsp`, `l_agdsp`, `pm_sys` |
 
@@ -98,6 +99,10 @@ The files belong to Meizu, Unisoc and their licensors. They are extracted from a
 The A/B payload carries `init_boot`, `vendor_boot` and the dynamic partitions only. `boot`, `dtbo` and every `vbmeta*` are left out: the bootloader boots only the Meizu-signed `vbmeta`, and both slots already hold the stock `boot`, `dtbo` and `vbmeta` images. The LineageOS Updater reads `updater/mblu21.json` from [lineage_build_mblu21](https://github.com/tickernelz/lineage_build_mblu21) (`lineage.updater.uri` in `system.prop`).
 
 An update replaces `init_boot` on the other slot, so root is lost unless it is patched again before the reboot, for SukiSU Ultra or KernelSU: `ksud boot-patch -b <init_boot of the other slot> --partition init_boot`, then write the result back to that slot.
+
+## SELinux
+
+The stock vendor policy is compiled for platform version 33.0, so rules for stock vendor domains cannot come from `BOARD_VENDOR_SEPOLICY_DIRS` (the vendor image is stock) or `BOARD_ODM_SEPOLICY_DIRS` (it versions against the current platform). `odm/odm_sepolicy.cil` holds them in CIL against the `_33_0` attributes, like the stock `odm_sepolicy.cil`; init compiles it with the rest of the split policy at boot. Rules and labels for platform domains live in `sepolicy/private` on `system_ext`.
 
 ## IMS
 
