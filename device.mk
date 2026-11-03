@@ -41,10 +41,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PRODUCT_PROPERTIES += \
     debug.hwc.gsp.disable=1
 
-ifneq ($(MBLU21_ADB_KEYS),)
-PRODUCT_COPY_FILES += $(MBLU21_ADB_KEYS):$(TARGET_COPY_OUT_RECOVERY)/root/product/etc/security/adb_keys
-endif
-
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_system=true \
     POSTINSTALL_PATH_system=system/bin/otapreopt_script \
@@ -69,7 +65,3 @@ PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
 $(call inherit-product, vendor/meizu/mblu21/mblu21-vendor.mk)
-
-ifeq ($(WITH_GMS),true)
-$(call inherit-product, vendor/gapps/arm64/arm64-vendor.mk)
-endif
