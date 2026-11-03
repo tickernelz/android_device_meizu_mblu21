@@ -1,0 +1,2 @@
+on init
+    write /sys/bus/platform/devices/64200000.spi:pmic@0:hw-reset@1bc0/keypad_mode 1

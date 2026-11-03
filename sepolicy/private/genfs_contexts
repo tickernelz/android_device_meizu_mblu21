@@ -1,0 +1,1 @@
+genfscon sysfs /devices/platform/soc/soc:aon/64200000.spi/spi_master/spi4/spi4.0/64200000.spi:pmic@0:hw-reset@1bc0/keypad_mode u:object_r:sysfs_mblu21_7sreset:s0
