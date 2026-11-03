@@ -1,1 +1,2 @@
+lineage.updater.uri=https://raw.githubusercontent.com/tickernelz/lineage_build_mblu21/main/updater/mblu21.json
 ro.telephony.default_network=9,9
