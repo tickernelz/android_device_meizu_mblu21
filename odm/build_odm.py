@@ -19,9 +19,10 @@ FIRMWARE = {
 }
 PRECOMPILED = 'etc/selinux/precompiled_sepolicy'
 POLICY_HASHES = (
-    ('system', 'etc/selinux/plat_sepolicy_and_mapping.sha256'),
-    ('system_ext', 'etc/selinux/system_ext_sepolicy_and_mapping.sha256'),
-    ('product', 'etc/selinux/product_sepolicy_and_mapping.sha256'),
+    ('system', 'etc/selinux/plat_sepolicy.cil', 'etc/selinux/plat_sepolicy_and_mapping.sha256'),
+    ('system_ext', 'etc/selinux/system_ext_sepolicy.cil',
+     'etc/selinux/system_ext_sepolicy_and_mapping.sha256'),
+    ('product', 'etc/selinux/product_sepolicy.cil', 'etc/selinux/product_sepolicy_and_mapping.sha256'),
 )
 POLICY_HASH_META = (0, 0, 0o644, 'u:object_r:vendor_configs_file:s0')
 POLICY_VERSION = 30
@@ -217,12 +218,14 @@ def main():
     if PRECOMPILED not in meta:
         sys.exit(f'stock odm has no /{PRECOMPILED}')
     split_policy(tool('secilc'), parts, os.path.join(root, PRECOMPILED))
-    for name, rel in POLICY_HASHES:
+    for name, cil, rel in POLICY_HASHES:
         actual = os.path.join(parts[name], rel)
         target = PRECOMPILED + '.' + os.path.basename(rel)
         if os.path.exists(actual):
             shutil.copyfile(actual, os.path.join(root, target))
             meta.setdefault(target, POLICY_HASH_META)
+        elif os.path.exists(os.path.join(parts[name], cil)):
+            sys.exit(f'{name} has /{cil} but no /{rel}')
         elif target in meta:
             os.remove(os.path.join(root, target))
             del meta[target]
