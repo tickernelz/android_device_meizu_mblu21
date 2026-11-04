@@ -133,6 +133,28 @@ def first_line(path):
     return open(path).read().split('\n')[0]
 
 
+def extract_selinux(tool, image, dest, sub):
+    with open(image, 'rb') as f:
+        head = f.read(4)
+        f.seek(1024)
+        erofs = struct.unpack('<I', f.read(4))[0] == 0xE0F5E1E2
+    if erofs:
+        run(tool('fsck.erofs'), f'--extract={dest}', '--no-preserve', image)
+        return
+    if struct.unpack('<I', head)[0] == 0xED26FF3A:
+        raw = dest + '.raw'
+        run(tool('simg2img'), image, raw)
+        image = raw
+    etc = os.path.join(dest, sub, 'etc')
+    os.makedirs(etc)
+    src = '/' + os.path.join(sub, 'etc/selinux') if sub else '/etc/selinux'
+    run(tool('debugfs'), '-R', f'rdump {src} {etc}', image)
+    if not os.path.isdir(os.path.join(etc, 'selinux')):
+        sys.exit(f'{image}: no {src}')
+    if image.endswith('.raw'):
+        os.remove(image)
+
+
 def split_policy(secilc, parts, out):
     plat = os.path.join(parts['system'], 'etc/selinux')
     vendor = os.path.join(parts['vendor'], 'etc/selinux')
@@ -224,7 +246,7 @@ def main():
     parts = {'odm': root}
     for name, image, sub in (('system', args.system, 'system'), ('system_ext', args.system_ext, ''),
                              ('product', args.product, ''), ('vendor', args.vendor, '')):
-        run(tool('fsck.erofs'), f'--extract={os.path.join(work, name)}', '--no-preserve', image)
+        extract_selinux(tool, image, os.path.join(work, name), sub)
         parts[name] = os.path.join(work, name, sub)
     if PRECOMPILED not in meta:
         sys.exit(f'stock odm has no /{PRECOMPILED}')
