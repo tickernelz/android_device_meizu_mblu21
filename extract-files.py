@@ -371,7 +371,11 @@ blob_fixups: blob_fixups_user_type = {
         )
         .stripzip(),
     'vendor_ramdisk/first_stage_ramdisk/fstab.ums9230_6h10': blob_fixup()
-        .regex_replace(r',avb(_keys)?=[^,\s]*', ''),
+        .regex_replace(r',avb(_keys)?=[^,\s]*', '')
+        .regex_replace(
+            r'(?m)^(system_ext|product)(\s+\S+\s+)erofs\s+ro(\s+\S+)$',
+            r'\g<0>\n\1\2ext4 ro,barrier=1\3',
+        ),
 }  # fmt: skip
 
 module = ExtractUtilsModule(
