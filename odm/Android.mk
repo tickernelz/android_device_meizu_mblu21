@@ -27,6 +27,8 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		$(HOST_OUT_EXECUTABLES)/dump.erofs \
 		$(HOST_OUT_EXECUTABLES)/fsck.erofs \
 		$(HOST_OUT_EXECUTABLES)/mkfs.erofs \
+		$(HOST_OUT_EXECUTABLES)/debugfs \
+		$(HOST_OUT_EXECUTABLES)/simg2img \
 		$(AVBTOOL)
 	@mkdir -p $(dir $@)
 	python3 $(PRIVATE_DIR)/build_odm.py \
