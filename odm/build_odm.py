@@ -24,7 +24,7 @@ REMOVED = (
 )
 SEPOLICY = 'etc/selinux/odm_sepolicy.cil'
 SERVICE_CONTEXTS = 'etc/selinux/odm_service_contexts'
-SELINUX_LABEL_OF = 'etc/selinux/odm_hwservice_contexts'
+SERVICE_CONTEXTS_LABEL = 'u:object_r:vendor_service_contexts_file:s0'
 FIRMWARE_LABEL = 'u:object_r:vendor_file:s0'
 XATTR_PREFIX = {1: 'user.', 4: 'trusted.', 6: 'security.'}
 
@@ -156,7 +156,7 @@ def main():
     if SERVICE_CONTEXTS in meta:
         sys.exit(f'stock odm already has /{SERVICE_CONTEXTS}')
     shutil.copyfile(args.service_contexts, os.path.join(root, SERVICE_CONTEXTS))
-    meta[SERVICE_CONTEXTS] = meta[SELINUX_LABEL_OF]
+    meta[SERVICE_CONTEXTS] = (0, 0, 0o644, SERVICE_CONTEXTS_LABEL)
 
     for ko, (symbol, name) in FIRMWARE.items():
         rel = 'firmware/' + name
