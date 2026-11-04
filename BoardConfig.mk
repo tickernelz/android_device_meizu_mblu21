@@ -129,9 +129,6 @@ BOARD_DTBO_CFG := $(DEVICE_PATH)/configs/dtbo.cfg
 
 BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 bootconfig
 BOARD_BOOTCONFIG := androidboot.hardware=ums9230_6h10
-ifneq ($(MBLU21_ENFORCING),true)
-BOARD_BOOTCONFIG += androidboot.selinux=permissive
-endif
 BOARD_DTB_CFG := $(DEVICE_PATH)/configs/dtb.cfg
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_KERNEL_BASE := 0x00000000
