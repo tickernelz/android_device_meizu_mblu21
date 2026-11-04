@@ -1,0 +1,11 @@
+#
+# SPDX-FileCopyrightText: 2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+#
+
+service uniber /vendor/bin/uniber -f /vendor/etc/uniber.conf
+    override
+    class main
+    user root
+    group root
+    disabled
