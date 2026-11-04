@@ -133,26 +133,31 @@ def first_line(path):
     return open(path).read().split('\n')[0]
 
 
-def extract_selinux(tool, image, dest, sub):
+def magic(image, offset):
     with open(image, 'rb') as f:
-        head = f.read(4)
-        f.seek(1024)
-        erofs = struct.unpack('<I', f.read(4))[0] == 0xE0F5E1E2
-    if erofs:
-        run(tool('fsck.erofs'), f'--extract={dest}', '--no-preserve', image)
-        return
-    if struct.unpack('<I', head)[0] == 0xED26FF3A:
+        f.seek(offset)
+        return struct.unpack('<I', f.read(4))[0]
+
+
+def extract_selinux(tool, image, dest, sub):
+    raw = None
+    if magic(image, 0) == 0xED26FF3A:
         raw = dest + '.raw'
         run(tool('simg2img'), image, raw)
         image = raw
-    etc = os.path.join(dest, sub, 'etc')
-    os.makedirs(etc)
-    src = '/' + os.path.join(sub, 'etc/selinux') if sub else '/etc/selinux'
-    run(tool('debugfs'), '-R', f'rdump {src} {etc}', image)
-    if not os.path.isdir(os.path.join(etc, 'selinux')):
-        sys.exit(f'{image}: no {src}')
-    if image.endswith('.raw'):
-        os.remove(image)
+    try:
+        if magic(image, 1024) == 0xE0F5E1E2:
+            run(tool('fsck.erofs'), f'--extract={dest}', '--no-preserve', image)
+            return
+        etc = os.path.join(dest, sub, 'etc')
+        os.makedirs(etc)
+        src = '/' + os.path.join(sub, 'etc/selinux') if sub else '/etc/selinux'
+        run(tool('debugfs'), '-R', f'rdump {src} {etc}', image)
+        if not os.path.isdir(os.path.join(etc, 'selinux')):
+            sys.exit(f'{image}: no {src}')
+    finally:
+        if raw:
+            os.remove(raw)
 
 
 def split_policy(secilc, parts, out):
