@@ -17,11 +17,16 @@ FIRMWARE = {
     'spi_ilitek.ko': ('CTPM_FW_DEF', 'ILITEK_FW_DEF.ili'),
     'focaltech_spi_v4_1.ko': ('fw_file', 'focaltech_ts_fw_.bin'),
 }
-REMOVED = (
-    'etc/selinux/precompiled_sepolicy',
-    'etc/selinux/precompiled_sepolicy.plat_sepolicy_and_mapping.sha256',
-    'etc/selinux/precompiled_sepolicy.system_ext_sepolicy_and_mapping.sha256',
+PRECOMPILED = 'etc/selinux/precompiled_sepolicy'
+POLICY_HASHES = (
+    ('system', 'etc/selinux/plat_sepolicy.cil', 'etc/selinux/plat_sepolicy_and_mapping.sha256'),
+    ('system_ext', 'etc/selinux/system_ext_sepolicy.cil',
+     'etc/selinux/system_ext_sepolicy_and_mapping.sha256'),
+    ('product', 'etc/selinux/product_sepolicy.cil', 'etc/selinux/product_sepolicy_and_mapping.sha256'),
 )
+POLICY_HASH_META = (0, 0, 0o644, 'u:object_r:vendor_configs_file:s0')
+POLICY_VERSION = 30
+DEFAULT_GENFS_LABELS_VERSION = 202404
 SEPOLICY = 'etc/selinux/odm_sepolicy.cil'
 SERVICE_CONTEXTS = 'etc/selinux/odm_service_contexts'
 SERVICE_CONTEXTS_LABEL = 'u:object_r:vendor_service_contexts_file:s0'
@@ -122,6 +127,43 @@ def carve(ko, symbol):
     sys.exit(f'{ko}: symbol {symbol} not found')
 
 
+def first_line(path):
+    return open(path).read().split('\n')[0]
+
+
+def split_policy(secilc, parts, out):
+    plat = os.path.join(parts['system'], 'etc/selinux')
+    vendor = os.path.join(parts['vendor'], 'etc/selinux')
+    version = first_line(os.path.join(vendor, 'plat_sepolicy_vers.txt'))
+    if not version:
+        sys.exit('vendor plat_sepolicy_vers.txt is empty')
+    try:
+        genfs = int(open(os.path.join(vendor, 'genfs_labels_version.txt')).read().strip())
+    except (FileNotFoundError, ValueError):
+        genfs = DEFAULT_GENFS_LABELS_VERSION
+    genfs_cil = os.path.join(plat, f'plat_sepolicy_genfs_{genfs}.cil')
+    if not os.path.exists(genfs_cil) and genfs >= 202504:
+        sys.exit(f'system has no {os.path.basename(genfs_cil)}')
+    for required in ('plat_pub_versioned.cil', 'vendor_sepolicy.cil'):
+        if not os.path.exists(os.path.join(vendor, required)):
+            sys.exit(f'vendor has no etc/selinux/{required}')
+    optional = [
+        os.path.join(plat, f'mapping/{version}.compat.cil'),
+        os.path.join(parts['system_ext'], 'etc/selinux/system_ext_sepolicy.cil'),
+        os.path.join(parts['system_ext'], f'etc/selinux/mapping/{version}.cil'),
+        os.path.join(parts['system_ext'], f'etc/selinux/mapping/{version}.compat.cil'),
+        os.path.join(parts['product'], 'etc/selinux/product_sepolicy.cil'),
+        os.path.join(parts['product'], f'etc/selinux/mapping/{version}.cil'),
+        os.path.join(vendor, 'plat_pub_versioned.cil'),
+        os.path.join(vendor, 'vendor_sepolicy.cil'),
+        os.path.join(parts['odm'], SEPOLICY),
+        genfs_cil,
+    ]
+    run(secilc, os.path.join(plat, 'plat_sepolicy.cil'), '-m', '-M', 'true', '-G', '-N', '-v',
+        '-c', str(POLICY_VERSION), os.path.join(plat, f'mapping/{version}.cil'),
+        '-o', out, '-f', os.devnull, *[f for f in optional if os.path.exists(f)])
+
+
 def escape(path):
     return re.sub(r'([.^$*+?()\[\]{}|\\])', r'\\\1', path)
 
@@ -133,6 +175,10 @@ def main():
     parser.add_argument('--service-contexts', required=True)
     parser.add_argument('--property-contexts', required=True)
     parser.add_argument('--modules', required=True)
+    parser.add_argument('--system', required=True)
+    parser.add_argument('--system-ext', required=True)
+    parser.add_argument('--product', required=True)
+    parser.add_argument('--vendor', required=True)
     parser.add_argument('--host-bin', required=True)
     parser.add_argument('--avbtool', required=True)
     parser.add_argument('--out', required=True)
@@ -145,12 +191,6 @@ def main():
     root = os.path.join(work, 'root')
     run(tool('fsck.erofs'), f'--extract={root}', '--no-preserve', args.stock)
     stock, meta = metadata(tool('dump.erofs'), args.stock, root)
-
-    for rel in REMOVED:
-        if rel not in meta:
-            sys.exit(f'stock odm has no /{rel}')
-        os.remove(os.path.join(root, rel))
-        del meta[rel]
 
     with open(os.path.join(root, SEPOLICY), 'ab') as f:
         f.write(open(args.sepolicy, 'rb').read())
@@ -169,6 +209,26 @@ def main():
         with open(os.path.join(root, rel), 'wb') as f:
             f.write(carve(os.path.join(args.modules, ko), symbol))
         meta[rel] = (0, 0, 0o644, FIRMWARE_LABEL)
+
+    parts = {'odm': root}
+    for name, image, sub in (('system', args.system, 'system'), ('system_ext', args.system_ext, ''),
+                             ('product', args.product, ''), ('vendor', args.vendor, '')):
+        run(tool('fsck.erofs'), f'--extract={os.path.join(work, name)}', '--no-preserve', image)
+        parts[name] = os.path.join(work, name, sub)
+    if PRECOMPILED not in meta:
+        sys.exit(f'stock odm has no /{PRECOMPILED}')
+    split_policy(tool('secilc'), parts, os.path.join(root, PRECOMPILED))
+    for name, cil, rel in POLICY_HASHES:
+        actual = os.path.join(parts[name], rel)
+        target = PRECOMPILED + '.' + os.path.basename(rel)
+        if os.path.exists(actual):
+            shutil.copyfile(actual, os.path.join(root, target))
+            meta.setdefault(target, POLICY_HASH_META)
+        elif os.path.exists(os.path.join(parts[name], cil)):
+            sys.exit(f'{name} has /{cil} but no /{rel}')
+        elif target in meta:
+            os.remove(os.path.join(root, target))
+            del meta[target]
 
     contexts = os.path.join(work, 'file_contexts')
     fs_config = os.path.join(work, 'fs_config')

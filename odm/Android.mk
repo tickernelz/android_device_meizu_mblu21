@@ -19,6 +19,11 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		$(LOCAL_PATH)/odm_property_contexts \
 		$(MBLU21_STOCK_MODULES)/spi_ilitek.ko \
 		$(MBLU21_STOCK_MODULES)/focaltech_spi_v4_1.ko \
+		$(PRODUCT_OUT)/system.img \
+		$(PRODUCT_OUT)/system_ext.img \
+		$(PRODUCT_OUT)/product.img \
+		$(BOARD_PREBUILT_VENDORIMAGE) \
+		$(HOST_OUT_EXECUTABLES)/secilc \
 		$(HOST_OUT_EXECUTABLES)/dump.erofs \
 		$(HOST_OUT_EXECUTABLES)/fsck.erofs \
 		$(HOST_OUT_EXECUTABLES)/mkfs.erofs \
@@ -30,6 +35,10 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		--service-contexts $(PRIVATE_DIR)/odm_service_contexts \
 		--property-contexts $(PRIVATE_DIR)/odm_property_contexts \
 		--modules $(MBLU21_STOCK_MODULES) \
+		--system $(PRODUCT_OUT)/system.img \
+		--system-ext $(PRODUCT_OUT)/system_ext.img \
+		--product $(PRODUCT_OUT)/product.img \
+		--vendor $(BOARD_PREBUILT_VENDORIMAGE) \
 		--host-bin $(HOST_OUT_EXECUTABLES) \
 		--avbtool $(AVBTOOL) \
 		--out $@

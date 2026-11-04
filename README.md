@@ -50,7 +50,7 @@ The kernel image is the stock Google GKI build; every kernel module the vendor s
 | `vendor_boot` | built: DTB from `kernel/meizu/ums9230`, stock cmdline and bootconfig, first-stage modules built from source in the stock load order, stock fstabs and ueventd rules in the platform ramdisk, plus Lineage Recovery with fastbootd as a separate recovery ramdisk |
 | `dtbo` | built from `kernel/meizu/ums9230`; its nine overlays are byte for byte the stock ones |
 | `vendor` | stock image, unchanged |
-| `odm` | the stock image rebuilt by `odm/build_odm.py` with three changes: `odm_sepolicy.cil` gets the rules in `odm/odm_sepolicy.cil` appended, the stale `precompiled_sepolicy` is removed, and `firmware/` gets the touch panel firmware (see below). Every other file keeps its stock content, owner, mode and SELinux label; the script checks this on the image it writes |
+| `odm` | the stock image rebuilt by `odm/build_odm.py` with three changes: `odm_sepolicy.cil` gets the rules in `odm/odm_sepolicy.cil` appended, `precompiled_sepolicy` is replaced by the split policy compiled with the arguments init uses from this build's `system`, `system_ext` and `product` images, the stock vendor image and the new `odm_sepolicy.cil`, next to the `system`, `system_ext` and `product` policy hashes init compares before loading it, and `firmware/` gets the touch panel firmware (see below). Every other file keeps its stock content, owner, mode and SELinux label; the script checks this on the image it writes |
 | `vendor_dlkm` | built: modules from `kernel/meizu/ums9230` and `kernel/meizu/ums9230-modules` in the stock load order |
 | `system_dlkm` | built from the `zram` and `zsmalloc` modules of GKI build `12096863`, signed by Google |
 | `init_boot`, `system`, `system_ext`, `product` | built from LineageOS source |
@@ -109,7 +109,7 @@ An update replaces `init_boot` on the other slot, so root is lost unless it is p
 
 ## SELinux
 
-The stock vendor policy is compiled for platform version 33.0, so rules for stock vendor domains cannot come from `BOARD_VENDOR_SEPOLICY_DIRS` (the vendor image is stock) or `BOARD_ODM_SEPOLICY_DIRS` (it versions against the current platform). `odm/odm_sepolicy.cil` holds them in CIL against the `_33_0` attributes, like the stock `odm_sepolicy.cil`; init compiles it with the rest of the split policy at boot. Rules and labels for platform domains live in `sepolicy/private` on `system_ext`.
+The stock vendor policy is compiled for platform version 33.0, so rules for stock vendor domains cannot come from `BOARD_VENDOR_SEPOLICY_DIRS` (the vendor image is stock) or `BOARD_ODM_SEPOLICY_DIRS` (it versions against the current platform). `odm/odm_sepolicy.cil` holds them in CIL against the `_33_0` attributes, like the stock `odm_sepolicy.cil`; `odm/build_odm.py` compiles it with the rest of the split policy into `/odm/etc/selinux/precompiled_sepolicy`, so init loads that file instead of running `secilc` at boot. Rules and labels for platform domains live in `sepolicy/private` on `system_ext`.
 
 Some denied accesses are hidden with `dontaudit` instead of allowed, because nothing needs them:
 
