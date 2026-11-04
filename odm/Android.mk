@@ -16,6 +16,7 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		$(LOCAL_PATH)/build_odm.py \
 		$(LOCAL_PATH)/odm_sepolicy.cil \
 		$(LOCAL_PATH)/odm_service_contexts \
+		$(LOCAL_PATH)/odm_property_contexts \
 		$(MBLU21_STOCK_MODULES)/spi_ilitek.ko \
 		$(MBLU21_STOCK_MODULES)/focaltech_spi_v4_1.ko \
 		$(HOST_OUT_EXECUTABLES)/dump.erofs \
@@ -27,6 +28,7 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		--stock $(MBLU21_STOCK_ODMIMAGE) \
 		--sepolicy $(PRIVATE_DIR)/odm_sepolicy.cil \
 		--service-contexts $(PRIVATE_DIR)/odm_service_contexts \
+		--property-contexts $(PRIVATE_DIR)/odm_property_contexts \
 		--modules $(MBLU21_STOCK_MODULES) \
 		--host-bin $(HOST_OUT_EXECUTABLES) \
 		--avbtool $(AVBTOOL) \
