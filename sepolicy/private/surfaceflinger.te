@@ -1,1 +1,2 @@
+dontaudit surfaceflinger unlabeled:filesystem getattr;
 dontaudit surfaceflinger vendor_default_prop:file r_file_perms;
