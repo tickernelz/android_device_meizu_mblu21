@@ -31,7 +31,7 @@ Tested on one M416H. Every row names the build it was tested with; a component w
 | `cat /sys/class/input/*/name` after `rmmod spi_ilitek`, and `tinycap` with its default 1024-frame period: both used to panic the kernel | no panic: the touch input devices go away with the module, and a capture buffer larger than the DMA buffer is refused with `EINVAL` | same build, 2026-11-04 |
 | VoLTE, Telkomsel SIM | **network/SIM limitation, not tested**: the modem has IMS voice on (`AT+CAVIMS: 1`, IMS-preferred voice domain, IMS APN at cid 11) but the network reports IMS voice over PS not supported (`AT+CIREP: 1,0`, `mVopsSupport = 3`), so IMS never registers. The stock firmware never showed VoLTE with this SIM either. Retest with another operator's SIM. | r7, 2026-11-03 |
 
-A build boots with SELinux permissive unless `MBLU21_ENFORCING=true` is set in the build environment; enforcing becomes the default once an enforcing build logs no blocked access through the full test matrix.
+Every build boots with SELinux enforcing. Builds before this change booted permissive unless `MBLU21_ENFORCING=true` was set; the rows above that name the flag were tested that way.
 
 The first screen-off after boot logs `unbalanced disables for regulator-dummy` from `sprd_panel_unprepare()`. The stock `sprd-drm.ko` does the same: its panel probe never enables the panel supply that the bootloader left on, and unprepare disables it.
 
