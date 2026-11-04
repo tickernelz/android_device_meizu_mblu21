@@ -13,3 +13,6 @@
 (typeattribute srmi_proxyd_exec_33_0)
 (typeattributeset srmi_proxyd_exec_33_0 (srmi_proxyd_exec))
 (expandtypeattribute (srmi_proxyd_exec_33_0) true)
+(typeattribute sysfs_mblu21_7sreset_33_0)
+(typeattributeset sysfs_mblu21_7sreset_33_0 (sysfs_mblu21_7sreset))
+(expandtypeattribute (sysfs_mblu21_7sreset_33_0) true)
