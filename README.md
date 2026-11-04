@@ -113,6 +113,11 @@ Some denied accesses are hidden with `dontaudit` instead of allowed, because not
 - `hal_audio_default` on `audio_prop`, `rild` on `system_prop` and `surfaceflinger` on `vendor_default_prop`: vendor code looks up the `persist.audio.*` debug switches, `persist.sys.c2k.autoswitch_enabled` and `persist.vendor.gpu.fbc`. Nothing sets these properties on this build, so a denied lookup returns the same default value. Allowing the reads would break the Treble property neverallows, and the stock enforcing policy denies them too.
 - `hal_graphics_composer_default` searching `/data/data`: the Mali driver looks for `/data/data/com.mali.testjava/mali_debug.config`, a debug file that does not exist.
 - `secure_element` writing in its cache, which has no app data label: ART tries to save a runtime app image in `/data/user_de/0/com.android.se/cache/oat_primary`. The app runs without it.
+- `hal_wifi_hostapd_default` on `system_prop`: the stock hostapd looks up `sys.wifi.softap.hwmode`, which nothing sets on this build. The hotspot starts with the default mode.
+- `isolated_app` and `sprd_logmanager_app` looking up `content_capture_service`: neither domain may use content capture in the platform or stock vendor policy, so the lookup fails and the app runs without the feature.
+- `hal_power_default` raising the scheduling priority of `platform_app` threads: the stock policy denies it as well, and the power HAL keeps working without the boost.
+
+The `misc` partition is labelled `misc_block_device` on `system_ext`, because the platform policy uses that type for `misc` (`init`, `misctrl`, `kcmdlinectrl`); `odm/odm_sepolicy.cil` gives the stock boot control HAL its access to the new label. `sysfs_mblu21_7sreset` is a public `system_ext` type with a 33.0 mapping, so the odm policy refers to it like any other platform type.
 
 The `kernel` domain denials for `/metadata/ota/state` and `/sys/firmware/devicetree/base/firmware/android` happen while init finishes the snapuserd transition, after the policy is loaded and before enforcing is switched on, so they are always logged with `permissive=1` and block nothing.
 
