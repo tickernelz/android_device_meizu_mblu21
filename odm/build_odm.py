@@ -31,6 +31,8 @@ SEPOLICY = 'etc/selinux/odm_sepolicy.cil'
 SERVICE_CONTEXTS = 'etc/selinux/odm_service_contexts'
 SERVICE_CONTEXTS_LABEL = 'u:object_r:vendor_service_contexts_file:s0'
 PROPERTY_CONTEXTS = 'etc/selinux/odm_property_contexts'
+INIT_DIR = 'etc/init'
+STOCK_INIT_RC = INIT_DIR + '/init.md.rc'
 FIRMWARE_LABEL = 'u:object_r:vendor_file:s0'
 XATTR_PREFIX = {1: 'user.', 4: 'trusted.', 6: 'security.'}
 
@@ -174,6 +176,7 @@ def main():
     parser.add_argument('--sepolicy', required=True)
     parser.add_argument('--service-contexts', required=True)
     parser.add_argument('--property-contexts', required=True)
+    parser.add_argument('--init-rc', required=True)
     parser.add_argument('--modules', required=True)
     parser.add_argument('--system', required=True)
     parser.add_argument('--system-ext', required=True)
@@ -201,6 +204,14 @@ def main():
         sys.exit(f'stock odm already has /{SERVICE_CONTEXTS}')
     shutil.copyfile(args.service_contexts, os.path.join(root, SERVICE_CONTEXTS))
     meta[SERVICE_CONTEXTS] = (0, 0, 0o644, SERVICE_CONTEXTS_LABEL)
+
+    rc = INIT_DIR + '/' + os.path.basename(args.init_rc)
+    if rc in meta:
+        sys.exit(f'stock odm already has /{rc}')
+    if STOCK_INIT_RC not in meta:
+        sys.exit(f'stock odm has no /{STOCK_INIT_RC}')
+    shutil.copyfile(args.init_rc, os.path.join(root, rc))
+    meta[rc] = meta[STOCK_INIT_RC]
 
     for ko, (symbol, name) in FIRMWARE.items():
         rel = 'firmware/' + name

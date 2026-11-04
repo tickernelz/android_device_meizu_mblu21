@@ -17,6 +17,7 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		$(LOCAL_PATH)/odm_sepolicy.cil \
 		$(LOCAL_PATH)/odm_service_contexts \
 		$(LOCAL_PATH)/odm_property_contexts \
+		$(LOCAL_PATH)/uniber.rc \
 		$(MBLU21_STOCK_MODULES)/spi_ilitek.ko \
 		$(MBLU21_STOCK_MODULES)/focaltech_spi_v4_1.ko \
 		$(PRODUCT_OUT)/system.img \
@@ -34,6 +35,7 @@ $(BOARD_PREBUILT_ODMIMAGE): \
 		--sepolicy $(PRIVATE_DIR)/odm_sepolicy.cil \
 		--service-contexts $(PRIVATE_DIR)/odm_service_contexts \
 		--property-contexts $(PRIVATE_DIR)/odm_property_contexts \
+		--init-rc $(PRIVATE_DIR)/uniber.rc \
 		--modules $(MBLU21_STOCK_MODULES) \
 		--system $(PRODUCT_OUT)/system.img \
 		--system-ext $(PRODUCT_OUT)/system_ext.img \
