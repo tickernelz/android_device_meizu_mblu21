@@ -25,6 +25,7 @@ REMOVED = (
 SEPOLICY = 'etc/selinux/odm_sepolicy.cil'
 SERVICE_CONTEXTS = 'etc/selinux/odm_service_contexts'
 SERVICE_CONTEXTS_LABEL = 'u:object_r:vendor_service_contexts_file:s0'
+PROPERTY_CONTEXTS = 'etc/selinux/odm_property_contexts'
 FIRMWARE_LABEL = 'u:object_r:vendor_file:s0'
 XATTR_PREFIX = {1: 'user.', 4: 'trusted.', 6: 'security.'}
 
@@ -130,6 +131,7 @@ def main():
     parser.add_argument('--stock', required=True)
     parser.add_argument('--sepolicy', required=True)
     parser.add_argument('--service-contexts', required=True)
+    parser.add_argument('--property-contexts', required=True)
     parser.add_argument('--modules', required=True)
     parser.add_argument('--host-bin', required=True)
     parser.add_argument('--avbtool', required=True)
@@ -152,6 +154,8 @@ def main():
 
     with open(os.path.join(root, SEPOLICY), 'ab') as f:
         f.write(open(args.sepolicy, 'rb').read())
+    with open(os.path.join(root, PROPERTY_CONTEXTS), 'ab') as f:
+        f.write(b'\n' + open(args.property_contexts, 'rb').read())
 
     if SERVICE_CONTEXTS in meta:
         sys.exit(f'stock odm already has /{SERVICE_CONTEXTS}')

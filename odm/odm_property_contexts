@@ -1,0 +1,5 @@
+ro.product.hardware              u:object_r:vendor_default_prop:s0 exact string
+ro.recovery.ui.dropscreen        u:object_r:vendor_default_prop:s0 exact string
+ro.recovery.ui.margin_height     u:object_r:vendor_default_prop:s0 exact string
+ro.storage.flash_type            u:object_r:vendor_default_prop:s0 exact string
+ro.sys.sdcardfs                  u:object_r:vendor_default_prop:s0 exact string
