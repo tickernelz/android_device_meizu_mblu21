@@ -49,14 +49,11 @@ re-keyed.
 
 ## SELinux
 
-`androidboot.selinux=permissive` is still unconditional: SELinux stays
-permissive until enforcing can cover the vendor domains this platform touches.
-A fresh enforcing boot blocks 162 accesses (vendor_init property sets from the
-stock vendor/build.prop, audio_prop reads, composer graphics props, power HAL
-sys_nice, rild system_prop, system_suspend wakeup sysfs), and those denials come
-from vendor/ODM domains. `vendor.img` and `odm.img` are the stock prebuilt
-images here, so `BOARD_VENDOR_SEPOLICY_DIRS` is staged but never packaged: the
-policy has to live in the system_ext private directory to reach Android.
+SELinux is enforcing on every build; `vendor_boot` carries no
+`androidboot.selinux`. Rules for the stock vendor domains are appended to the
+stock `odm_sepolicy.cil` by `odm/build_odm.py`, and rules for platform domains
+live in `sepolicy/private` on `system_ext`; README.md describes both and lists
+each `dontaudit` with the reason the access is not needed.
 
 ## Flashing the boot chain
 
