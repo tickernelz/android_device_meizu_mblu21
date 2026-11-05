@@ -57,7 +57,19 @@ The kernel image is the stock Google GKI build; every kernel module the vendor s
 | `init_boot`, `system`, `system_ext`, `product` | built from PixelOS source; `system`, `system_ext` and `product` are erofs, as on stock, because the Google apps PixelOS ships (about 2.5 GB) would not fit `group_unisoc` as ext4 |
 | `vbmeta*` | built; same chain layout and rollback index locations as stock, including the stock Unisoc key for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 
-All rebuilt and re-signed images use the public AOSP test key (`external/avb/test/data/testkey_rsa4096.pem`), so the device must have an unlocked bootloader to boot them.
+All rebuilt and re-signed images use the public AOSP test key (`external/avb/test/data/testkey_rsa4096.pem`), so the device must have an unlocked bootloader to boot them. Meizu offers no unlock for this phone; the test phone was unlocked with the CVE-2022-38694 BootROM method ([hardware notes](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#what-the-bootloader-enforces)). Its `/proc/bootconfig` reads `androidboot.flash.locked = "0"`, `androidboot.vbmeta.device_state = "unlocked"` and `androidboot.verifiedbootstate = "orange"` (2026-11-06). Read the state there: `getprop ro.boot.flash.locked` and `ro.boot.verifiedbootstate` show `1` and `green` while a root module spoofs them.
+
+### Why `boot` keeps the stock kernel
+
+Even unlocked, the bootloader boots only the Meizu-signed top-level `vbmeta`: a `vbmeta` with verification disabled and one signed with the AOSP test key both stopped at the logo ([table](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#what-the-bootloader-enforces)). The stock `vbmeta` is the same on both slots (sha256 `83789a72…`, key sha1 `5cec5a31…`); it has 14 chain descriptors and no hash descriptor, and it chains `boot` and `dtbo` to Meizu's key `d46eb3be8ba9641586d7a3628c7375ebe5b7ffb6`. The stock `boot` on both slots (sha256 `3a78e139…`) is signed with that key. Measured on 2026-11-06 from a root shell:
+
+    for p in vbmeta_a vbmeta_b boot_a boot_b; do dd if=/dev/block/by-name/$p of=/data/local/tmp/$p.img bs=1M; done
+    avbtool info_image --image vbmeta_b.img
+    avbtool info_image --image boot_b.img
+
+Chain descriptors are not enforced for every partition: `vendor_boot` and `init_boot` are chained to other Meizu keys (`4fce36c7…`, `f1553ffc…`), and the test-key `vendor_boot` of this tree and a modified `init_boot` both boot ([hardware notes](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#known-gaps)).
+
+A `boot` built from source was tried once, on 2026-11-03: a kernel from `kernel/meizu/ums9230` with SukiSU-Ultra built in (`boot-sukisu-ultra.img`, sha256 `61d6e77d…`) in `boot_a`, every other partition stock. The phone stopped at a striped logo, did not enumerate on USB and left an empty pstore; writing the stock `boot_a` back from download mode recovered it ([hardware notes](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#known-gaps)). Whether the bootloader refused the foreign signature on `boot` or that kernel failed before pstore was not isolated. The test that separates the two, the stock `Image` re-signed with the AOSP test key in `boot_a`, has not been run: `fastboot flash` and `fastboot boot` do not write on this unit, so every attempt and every recovery goes through `spd_dump` in download mode with the phone in hand ([write path](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#write-path)).
 
 The device has no `recovery` partition: recovery and fastbootd live in `vendor_boot`.
 
