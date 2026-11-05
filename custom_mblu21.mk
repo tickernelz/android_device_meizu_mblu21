@@ -13,7 +13,7 @@ $(call inherit-product, vendor/custom/config/common_full_phone.mk)
 TARGET_SCREEN_WIDTH := 720
 TARGET_PROVIDES_FACE_UNLOCK_HAL := true
 
-PRODUCT_NAME := lineage_mblu21
+PRODUCT_NAME := custom_mblu21
 PRODUCT_DEVICE := mblu21
 PRODUCT_BRAND := meizu
 PRODUCT_MODEL := Mblu 21

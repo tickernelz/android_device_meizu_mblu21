@@ -4,4 +4,4 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_mblu21.mk
+    $(LOCAL_DIR)/custom_mblu21.mk
