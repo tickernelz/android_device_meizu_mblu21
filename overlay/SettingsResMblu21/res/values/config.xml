@@ -5,6 +5,7 @@
 -->
 <resources>
     <bool name="config_face_enroll_hal_owns_camera">true</bool>
+    <bool name="config_show_smooth_display">true</bool>
     <integer name="face_preview_width">960</integer>
     <integer name="face_preview_height">720</integer>
 </resources>
