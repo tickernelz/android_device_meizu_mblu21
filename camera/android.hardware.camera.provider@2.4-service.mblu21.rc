@@ -1,0 +1,4 @@
+service vendor.camera-provider-2-4-mblu21 /odm/bin/hw/android.hardware.camera.provider@2.4-service.mblu21
+    class hal
+    user cameraserver
+    group camera
