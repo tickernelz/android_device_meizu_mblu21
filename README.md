@@ -1,6 +1,6 @@
 # Device tree for Meizu mBlu 21 (M416H)
 
-LineageOS 24.0 (Android 17) device tree for the Meizu mBlu 21, model M416H.
+PixelOS 17 (Android 17) device tree for the Meizu mBlu 21, model M416H. The `lineage-24.0` branch holds the LineageOS 24.0 tree it was ported from; vendor, kernel and kernel modules are shared.
 
 | | |
 |---|---|
@@ -11,10 +11,11 @@ LineageOS 24.0 (Android 17) device tree for the Meizu mBlu 21, model M416H.
 
 ## Status
 
-Tested on one M416H. Every row names the build it was tested with; a component without a row has not been tested.
+Tested on one M416H. Every row names the build it was tested with; a component without a row has not been tested. Rows dated before 2026-11-05 were tested on LineageOS 24.0 builds of the `lineage-24.0` branch, which uses the same vendor, kernel and kernel modules.
 
 | Component | Result | Build, date |
 |---|---|---|
+| PixelOS 17: boot, SELinux enforcing, display at 90 Hz (60 Hz with Smooth display off), touch, Wi-Fi 5 GHz, Telkomsel LTE data, MTP, 49 sensors, camera opens, KernelSU LKM with `susfs_guard_lkm` | works | release [`PixelOS-17.0-20261105-1507-UNOFFICIAL-mblu21`](https://github.com/tickernelz/pixelos_build_mblu21/releases/tag/PixelOS-17.0-20261105-1507-UNOFFICIAL-mblu21), this branch at `5fc7dc0`, 2026-11-05 |
 | Boot, display, touch, FBE unlock with a PIN, USB adb, charging | works | release [`lineage-24.0-20261103-UNOFFICIAL-mblu21`](https://github.com/tickernelz/lineage_build_mblu21/releases/tag/lineage-24.0-20261103-UNOFFICIAL-mblu21), this branch at `7dd4b55`, 2026-11-03 |
 | Wi-Fi (5 GHz), Telkomsel LTE data | works | same release, 2026-11-03 |
 | Rear and front camera: photo, video with audio | works | same release, 2026-11-03 |
@@ -47,13 +48,13 @@ The kernel image is the stock Google GKI build; every kernel module the vendor s
 | Image | Source |
 |---|---|
 | `boot` | stock, carrying the `Image` of Google GKI build `12096863` (`android13-5.15-2024-07`) byte for byte, re-signed |
-| `vendor_boot` | built: DTB from `kernel/meizu/ums9230`, stock cmdline and bootconfig, first-stage modules built from source in the stock load order, stock fstabs and ueventd rules in the platform ramdisk, plus Lineage Recovery with fastbootd as a separate recovery ramdisk |
+| `vendor_boot` | built: DTB from `kernel/meizu/ums9230`, stock cmdline and bootconfig, first-stage modules built from source in the stock load order, stock fstabs and ueventd rules in the platform ramdisk, plus the PixelOS recovery with fastbootd as a separate recovery ramdisk |
 | `dtbo` | built from `kernel/meizu/ums9230`; its nine overlays are byte for byte the stock ones |
 | `vendor` | stock image, unchanged |
 | `odm` | the stock image rebuilt by `odm/build_odm.py` with three changes: `odm_sepolicy.cil` gets the rules in `odm/odm_sepolicy.cil` appended, `precompiled_sepolicy` is replaced by the split policy compiled with the arguments init uses from this build's `system`, `system_ext` and `product` images, the stock vendor image and the new `odm_sepolicy.cil`, next to the `system`, `system_ext` and `product` policy hashes init compares before loading it, and `firmware/` gets the touch panel firmware (see below). Every other file keeps its stock content, owner, mode and SELinux label; the script checks this on the image it writes |
 | `vendor_dlkm` | built: modules from `kernel/meizu/ums9230` and `kernel/meizu/ums9230-modules` in the stock load order |
 | `system_dlkm` | built from the `zram` and `zsmalloc` modules of GKI build `12096863`, signed by Google |
-| `init_boot`, `system`, `system_ext`, `product` | built from LineageOS source |
+| `init_boot`, `system`, `system_ext`, `product` | built from PixelOS source; `system`, `system_ext` and `product` are erofs, as on stock, because the Google apps PixelOS ships (about 2.5 GB) would not fit `group_unisoc` as ext4 |
 | `vbmeta*` | built; same chain layout and rollback index locations as stock, including the stock Unisoc key for `l_modem`, `l_ldsp`, `l_gdsp`, `pm_sys`, `l_agdsp` |
 
 All rebuilt and re-signed images use the public AOSP test key (`external/avb/test/data/testkey_rsa4096.pem`), so the device must have an unlocked bootloader to boot them.
@@ -62,7 +63,7 @@ The device has no `recovery` partition: recovery and fastbootd live in `vendor_b
 
 ## Firmware
 
-LineageOS needs stock firmware `U01005` (`meizu/meizu_mblu/MEIZU_mblu:14/U01005/1745906188:user/release-keys`, security patch 2025-04-05) on both slots. The OTA does not carry firmware: `AB_OTA_PARTITIONS` has no modem, DSP or bootloader partition, so update_engine never writes `uboot`, `sml`, `trustos`, `teecfg`, `l_modem`, `l_ldsp`, `l_gdsp`, `l_agdsp` or `pm_sys`. Before the first LineageOS install, flash `U01005` and copy the active slot to the inactive one with LineageOS `copy-partitions`, so a slot switch never boots older or empty firmware.
+The ROM needs stock firmware `U01005` (`meizu/meizu_mblu/MEIZU_mblu:14/U01005/1745906188:user/release-keys`, security patch 2025-04-05) on both slots. The OTA does not carry firmware: `AB_OTA_PARTITIONS` has no modem, DSP or bootloader partition, so update_engine never writes `uboot`, `sml`, `trustos`, `teecfg`, `l_modem`, `l_ldsp`, `l_gdsp`, `l_agdsp` or `pm_sys`. Before the first install, flash `U01005` and copy the active slot to the inactive one (for example with LineageOS `copy-partitions`), so a slot switch never boots older or empty firmware.
 
 The modem and DSP images still go into the target files as radio files, because `vbmeta` chains them with the stock Unisoc key and `add_img_to_target_files` opens every chained image to compute the `vbmeta` digest.
 
@@ -81,7 +82,7 @@ Every proprietary file is listed in `proprietary-files.txt` and `proprietary-fir
 
 `proprietary/images/vendor.img` (765,497,344 bytes) is over the GitHub file size limit, so it is gitignored in the vendor repository and comes from `extract-files.py`.
 
-From a phone running LineageOS, with rooted debugging enabled:
+From a phone running a build of this tree, with root over adb (`adb root` on LineageOS, KernelSU with shell granted on PixelOS):
 
 ```
 ./extract-files.py
@@ -99,11 +100,11 @@ From a stock dump:
 
 `./setup-makefiles.py` regenerates the vendor makefiles from the lists.
 
-The files belong to Meizu, Unisoc and their licensors. They are extracted from a phone owned by the publisher, unmodified except for the removed AVB footers and the fstab fixup above, and are published only so that LineageOS can be built for the device. No license is granted for them. Rights holders who want a file removed can open an issue in the vendor repository.
+The files belong to Meizu, Unisoc and their licensors. They are extracted from a phone owned by the publisher, unmodified except for the removed AVB footers and the fstab fixup above, and are published only so that custom ROMs (PixelOS, LineageOS) can be built for the device. No license is granted for them. Rights holders who want a file removed can open an issue in the vendor repository.
 
 ## OTA
 
-The A/B payload carries `init_boot`, `vendor_boot` and the dynamic partitions only. `boot`, `dtbo` and every `vbmeta*` are left out: the bootloader boots only the Meizu-signed `vbmeta`, and both slots already hold the stock `boot`, `dtbo` and `vbmeta` images. The LineageOS Updater reads `updater/mblu21.json` from [lineage_build_mblu21](https://github.com/tickernelz/lineage_build_mblu21) (`lineage.updater.uri` in `system.prop`).
+The A/B payload carries `init_boot`, `vendor_boot` and the dynamic partitions only. `boot`, `dtbo` and every `vbmeta*` are left out: the bootloader boots only the Meizu-signed `vbmeta`, and both slots already hold the stock `boot`, `dtbo` and `vbmeta` images. PixelOS ships no updater for unofficial devices: install a newer build from the PixelOS recovery with `adb sideload`, or apply it from Android with `update_engine`, keeping data. Gesture navigation is the default overlay through `androidboot.vendor.overlay.theme`; the overlay manager applies it on every boot to users who have not picked a navigation mode, and an explicit three-button choice is kept.
 
 An update replaces `init_boot` on the other slot, so root is lost unless it is patched again before the reboot, for SukiSU Ultra or KernelSU: `ksud boot-patch -b <init_boot of the other slot> --partition init_boot`, then write the result back to that slot.
 
@@ -122,6 +123,10 @@ Some denied accesses are hidden with `dontaudit` instead of allowed, because not
 - `hal_wifi_hostapd_default` on `system_prop`: the stock hostapd looks up `sys.wifi.softap.hwmode`, which nothing sets on this build. The hotspot starts with the default mode.
 - `isolated_app` and `sprd_logmanager_app` looking up `content_capture_service`: neither domain may use content capture in the platform or stock vendor policy, so the lookup fails and the app runs without the feature.
 - `hal_power_default` raising the scheduling priority of `platform_app` threads: the stock policy denies it as well, and the power HAL keeps working without the boost.
+- `e2fs` formatting the `cache` partition: the stock vendor fstab still lists `/cache` as formattable, but this tree has no cache image and `/cache` links to `/data/cache`, so init tries to format the empty partition on every boot. The partition is labelled `cache_block_device` and the format stays denied.
+- `pcc_component` (Android System Intelligence) reading `/proc/version`: the platform denies it to every app domain, and hides the same read for `gmscore_app` and `priv_app`.
+
+`system_server` may read `custom_version_prop` and `pih_disable_prop`: PixelOS reads `net.pixelos.version` and `persist.sys.pihooks.disable.` in `system_server`, while its policy grants them only to apps and the shell.
 
 The `misc` partition is labelled `misc_block_device` on `system_ext`, because the platform policy uses that type for `misc` (`init`, `misctrl`, `kcmdlinectrl`); `odm/odm_sepolicy.cil` gives the stock boot control HAL its access to the new label. `sysfs_mblu21_7sreset` is a public `system_ext` type with a 33.0 mapping, so the odm policy refers to it like any other platform type.
 
@@ -140,7 +145,7 @@ The stock IMS stack lives on `system_ext` and depends on Unisoc additions to the
 
 ## Build
 
-See [lineage_build_mblu21](https://github.com/tickernelz/lineage_build_mblu21) for the local manifest and build script.
+See [pixelos_build_mblu21](https://github.com/tickernelz/pixelos_build_mblu21) for the local manifest, build script and install steps. The build runs `breakfast mblu21` (product `custom_mblu21`) and `m pixelos`.
 
 ## License
 

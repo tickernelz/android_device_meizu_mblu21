@@ -1,4 +1,4 @@
-# Bring-up status: LineageOS 24.0 (Android 17)
+# Bring-up status: LineageOS 24.0 (Android 17), the base of this PixelOS tree
 
 Verified on the device on 2026-11-02. Numbers below come from the running
 system, not from a build log.
