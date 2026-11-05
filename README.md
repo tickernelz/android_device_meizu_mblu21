@@ -147,6 +147,17 @@ The stock IMS stack lives on `system_ext` and depends on Unisoc additions to the
 
 See [pixelos_build_mblu21](https://github.com/tickernelz/pixelos_build_mblu21) for the local manifest, build script and install steps. The build runs `breakfast mblu21` (product `custom_mblu21`) and `m pixelos`.
 
+## Credits
+
+- [LineageOS](https://github.com/LineageOS): the tree layout, `extract-files.py` (extract-utils) and the SPDX headers follow LineageOS device trees; their headers are kept.
+- [arriRgb31/device_realme_rmx3760](https://github.com/arriRgb31/device_realme_rmx3760) by Ari Lukman Yusuf, the LineageOS tree for the realme C53 on the same UMS9230: read as a reference for the board layout during the first bring-up. No file was copied. The lines both trees share are standard `BoardConfig.mk` flags such as `BOARD_BOOT_HEADER_VERSION := 4` set from the stock images, one `PRODUCT_SOONG_NAMESPACES` line in `device.mk`, the `metadata`, `misc` and `userdata` entries both trees take from the stock Unisoc fstab, and generic init lines such as `class main`.
+- Kernel and kernel modules: Motorola's GPL releases ([kernel-sprd](https://github.com/MotorolaMobilityLLC/kernel-sprd) and the `sprd-kernel-modules-*` repositories), [realme-kernel-opensource](https://github.com/realme-kernel-opensource) and [mer-hybris/s19mps-kernel](https://github.com/mer-hybris/s19mps-kernel). Each import commit in the kernel repositories names the source commit it came from.
+- Proprietary files: the Meizu stock firmware U01005, extracted by `extract-files.py`.
+
+## History and AI assistance
+
+The bring-up history is on `lineage-24.0`; `seventeen` continues it with the PixelOS port. Most commits in this tree and in [pixelos_build_mblu21](https://github.com/tickernelz/pixelos_build_mblu21), and the mblu21 commits on top of the imported kernel sources (8 in `android_kernel_meizu_ums9230`, the import and fix commits in `android_kernel_meizu_ums9230-modules`), were written with AI coding assistants (LLM agents) at Zhafron's direction and tested on his phone as listed under [Status](#status). The rest of the kernel repositories is Linux, Google, Motorola, realme and mer-hybris code. Commits without an `Assisted-by: LLM` trailer are not human-only: before 2026-11-06 only 30 of the 74 commits on `lineage-24.0` and none of the 7 PixelOS commits on `seventeen` carry it.
+
 ## License
 
 Apache-2.0.
