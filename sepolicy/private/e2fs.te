@@ -1,0 +1,2 @@
+dontaudit e2fs cache_block_device:blk_file rw_file_perms;
+dontaudit e2fs sysfs_devices_block:dir search;
