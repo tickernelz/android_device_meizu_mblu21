@@ -53,6 +53,9 @@ AB_OTA_POSTINSTALL_CONFIG += \
     POSTINSTALL_OPTIONAL_system=true
 
 PRODUCT_PACKAGES += \
+    android.hardware.camera.provider@2.4-service.mblu21
+
+PRODUCT_PACKAGES += \
     CarrierConfigMblu21 \
     FrameworksResMblu21 \
     SettingsResMblu21 \

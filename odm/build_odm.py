@@ -205,6 +205,8 @@ def main():
     parser.add_argument('--property-contexts', required=True)
     parser.add_argument('--init-rc', required=True)
     parser.add_argument('--modules', required=True)
+    parser.add_argument('--file', nargs=3, action='append', default=[],
+                        metavar=('DEST', 'SRC', 'LABEL'))
     parser.add_argument('--system', required=True)
     parser.add_argument('--system-ext', required=True)
     parser.add_argument('--product', required=True)
@@ -239,6 +241,20 @@ def main():
         sys.exit(f'stock odm has no /{STOCK_INIT_RC}')
     shutil.copyfile(args.init_rc, os.path.join(root, rc))
     meta[rc] = meta[STOCK_INIT_RC]
+
+    for dest, src, label in args.file:
+        if dest in meta:
+            sys.exit(f'stock odm already has /{dest}')
+        parent = os.path.dirname(dest)
+        missing = []
+        while parent not in meta:
+            missing.append(parent)
+            parent = os.path.dirname(parent)
+        for directory in reversed(missing):
+            os.makedirs(os.path.join(root, directory))
+            meta[directory] = meta[os.path.dirname(directory)]
+        shutil.copyfile(src, os.path.join(root, dest))
+        meta[dest] = (0, 2000, 0o755, label) if dest.startswith('bin/') else (0, 0, 0o644, label)
 
     for ko, (symbol, name) in FIRMWARE.items():
         rel = 'firmware/' + name

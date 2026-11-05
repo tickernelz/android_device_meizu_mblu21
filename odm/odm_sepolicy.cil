@@ -6,6 +6,7 @@
 (allow create_spl_link sysfs_extcon_33_0 (file (getattr)))
 (dontaudit hal_audio_default audio_prop_33_0 (file (read getattr map open)))
 (allow hal_bootctrl_default misc_block_device_33_0 (blk_file (read write getattr open)))
+(allow hal_camera_default self (binder (call transfer)))
 (dontaudit hal_codec2_unisoc system_data_file_33_0 (dir (search)))
 (allow hal_gnss_ext_default self (capability (sys_nice)))
 (allow hal_graphics_composer_default graphics_config_prop_33_0 (file (read getattr map open)))

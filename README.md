@@ -51,7 +51,7 @@ The kernel image is the stock Google GKI build; every kernel module the vendor s
 | `vendor_boot` | built: DTB from `kernel/meizu/ums9230`, stock cmdline and bootconfig, first-stage modules built from source in the stock load order, stock fstabs and ueventd rules in the platform ramdisk, plus the PixelOS recovery with fastbootd as a separate recovery ramdisk |
 | `dtbo` | built from `kernel/meizu/ums9230`; its nine overlays are byte for byte the stock ones |
 | `vendor` | stock image, unchanged |
-| `odm` | the stock image rebuilt by `odm/build_odm.py` with three changes: `odm_sepolicy.cil` gets the rules in `odm/odm_sepolicy.cil` appended, `precompiled_sepolicy` is replaced by the split policy compiled with the arguments init uses from this build's `system`, `system_ext` and `product` images, the stock vendor image and the new `odm_sepolicy.cil`, next to the `system`, `system_ext` and `product` policy hashes init compares before loading it, and `firmware/` gets the touch panel firmware (see below). Every other file keeps its stock content, owner, mode and SELinux label; the script checks this on the image it writes |
+| `odm` | the stock image rebuilt by `odm/build_odm.py`: `odm_sepolicy.cil` and `odm_property_contexts` get the entries in `odm/` appended, `odm_service_contexts`, `etc/init/uniber.rc` and the [hidden camera provider](#hidden-cameras) are added, `precompiled_sepolicy` is replaced by the split policy compiled with the arguments init uses from this build's `system`, `system_ext` and `product` images, the stock vendor image and the new `odm_sepolicy.cil`, next to the `system`, `system_ext` and `product` policy hashes init compares before loading it, and `firmware/` gets the touch panel firmware (see below). Every other file keeps its stock content, owner, mode and SELinux label; the script checks this on the image it writes |
 | `vendor_dlkm` | built: modules from `kernel/meizu/ums9230` and `kernel/meizu/ums9230-modules` in the stock load order |
 | `system_dlkm` | built from the `zram` and `zsmalloc` modules of GKI build `12096863`, signed by Google |
 | `init_boot`, `system`, `system_ext`, `product` | built from PixelOS source; `system`, `system_ext` and `product` are erofs, as on stock, because the Google apps PixelOS ships (about 2.5 GB) would not fit `group_unisoc` as ext4 |
@@ -72,6 +72,22 @@ Chain descriptors are not enforced for every partition: `vendor_boot` and `init_
 A `boot` built from source was tried once, on 2026-11-03: a kernel from `kernel/meizu/ums9230` with SukiSU-Ultra built in (`boot-sukisu-ultra.img`, sha256 `61d6e77d…`) in `boot_a`, every other partition stock. The phone stopped at a striped logo, did not enumerate on USB and left an empty pstore; writing the stock `boot_a` back from download mode recovered it ([hardware notes](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#known-gaps)). Whether the bootloader refused the foreign signature on `boot` or that kernel failed before pstore was not isolated. The test that separates the two, the stock `Image` re-signed with the AOSP test key in `boot_a`, has not been run: `fastboot flash` and `fastboot boot` do not write on this unit, so every attempt and every recovery goes through `spd_dump` in download mode with the phone in hand ([write path](https://github.com/tickernelz/android_kernel_meizu_mblu21/blob/main/docs/HARDWARE-2026-11-02.md#write-path)).
 
 The device has no `recovery` partition: recovery and fastbootd live in `vendor_boot`.
+
+## Hidden cameras
+
+The stock camera provider (HIDL `android.hardware.camera.provider@2.4::ICameraProvider/legacy/0`) lists cameras 0, 1 and 2 and serves 13 ids it does not list: 20, 21, 24, 30, 31, 32, 37, 38, 39, 42, 46, 47 and 55. The stock face HAL opens 30 to enroll and 31 to unlock through `libcamera2ndk_vendor`; on stock, Meizu's cameraserver adds the unlisted ids.
+
+`camera/` builds `android.hardware.camera.provider@2.4-service.mblu21`, which `odm/build_odm.py` adds to `odm` with its init script and VINTF fragment. It registers `ICameraProvider/hidden/0`, lists the ids from 17 to 58 that `legacy/0` serves but does not list, and forwards every call to `legacy/0`. The characteristics it returns carry `SECURE_IMAGE_DATA` as their only capability, which cameraservice treats as a hidden secure camera: apps do not see these cameras, only vendor clients list them, and only clients running as the system user can open them. The provider runs in the stock `hal_camera_default` domain and exits when `legacy/0` dies, so init restarts it with the stock provider. It links against the VNDK 33 libraries of the stock vendor, whose `libc++` has no `__libcpp_verbose_abort`, so libc++ aborts are built as plain aborts.
+
+Measured on 2026-11-06 on a PixelOS build of this tree, before the provider was part of `odm`: `ro.camera.unlisted_hidden_ids` removed with `resetprop`, the provider and the VINTF fragment bind-mounted over `/odm/bin` and `/odm/etc/vintf`, `hwservicemanager` restarted, the provider started in `hal_camera_default` with the `binder` rule from `odm/odm_sepolicy.cil` loaded. The client is a vendor NDK program running as the system user that opens each camera with a private and a YUV 960x720 stream and streams for 3 seconds:
+
+| Setup | Ids the client lists | Cameras 30 and 31 | Cameras apps see |
+|---|---|---|---|
+| no hidden provider | 0, 1, 2 | open fails (`ACAMERA_ERROR_INVALID_PARAMETER`) | 3 |
+| hidden provider | 0, 1, 2 and the 13 unlisted ids | open, session configured, 6 frames each | 3 |
+| earlier cameraservice patch, for comparison | the same 16 | open, session configured, 6 frames each | 3 |
+
+Face enrollment and unlock through the provider have not been tested yet: they need a build that carries it in `odm`.
 
 ## Firmware
 
@@ -141,6 +157,8 @@ Some denied accesses are hidden with `dontaudit` instead of allowed, because not
 `system_server` may read `custom_version_prop` and `pih_disable_prop`: PixelOS reads `net.pixelos.version` and `persist.sys.pihooks.disable.` in `system_server`, while its policy grants them only to apps and the shell.
 
 The `misc` partition is labelled `misc_block_device` on `system_ext`, because the platform policy uses that type for `misc` (`init`, `misctrl`, `kcmdlinectrl`); `odm/odm_sepolicy.cil` gives the stock boot control HAL its access to the new label. `sysfs_mblu21_7sreset` is a public `system_ext` type with a 33.0 mapping, so the odm policy refers to it like any other platform type.
+
+`hal_camera_default` may make binder calls to itself: the [hidden camera provider](#hidden-cameras) runs in that stock domain and forwards every call to `legacy/0`, which runs in it too.
 
 The `kernel` domain denials for `/metadata/ota/state` and `/sys/firmware/devicetree/base/firmware/android` happen while init finishes the snapuserd transition, after the policy is loaded and before enforcing is switched on, so they are always logged with `permissive=1` and block nothing.
 
