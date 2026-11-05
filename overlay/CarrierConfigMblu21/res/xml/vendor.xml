@@ -6,5 +6,6 @@
 <carrier_config_list>
     <carrier_config mcc="510" mnc="10">
         <boolean name="carrier_volte_available_bool" value="true" />
+        <string name="default_preferred_apn_name_string">internet</string>
     </carrier_config>
 </carrier_config_list>
